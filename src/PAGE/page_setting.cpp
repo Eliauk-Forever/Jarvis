@@ -75,6 +75,7 @@ void wifi_detect(lv_timer_t * timer2)		    //检测是否连接WIFI，连接成�
         rtc.setTime(currentSecond, currentMinute, currentHour, monthDay, currentMonth, currentYear);
         lv_timer_resume(timer3);
         lv_timer_resume(timer4);
+		lv_timer_ready(timer4);
 		lv_timer_pause(timer2);
 	}
 	else
