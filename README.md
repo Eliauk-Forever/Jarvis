@@ -1,10 +1,8 @@
 # JARVIS
 
-#### 介绍
-Project Name : [JARVIS]
-Hardware Vision : V3.2
-Software Vison : V2.0
-System Vision : LVGL V8.1.0
-MCU : ESP-WROVER-32-B
-
-####
+| NAME     | VISION      |
+|----------|-------------|
+| Hardware | V3.2        |
+| Software | V2.0        |
+| System   | LVGL　V８.１.０ |
+| MCU      | ＥＳＰ３２       |
