@@ -98,8 +98,14 @@ void time_update(lv_timer_t * timer3)       //每1s执行一次
 void day_update(lv_timer_t * timer4)        //每86500s（一天）执行一次
 {
     currentYear = rtc.getYear();
-    currentMonth = rtc.getMonth();
+    currentMonth = rtc.getMonth() + 1;
     monthDay = rtc.getDay();
+	Serial.print("CurrentDay : ");
+	Serial.print(currentYear);
+	Serial.print("/");
+	Serial.print(currentMonth);
+	Serial.print("/");
+	Serial.println(monthDay);
 }
 
 static void back_keep_cb(lv_event_t* LV_EVENT_PRESSED)
