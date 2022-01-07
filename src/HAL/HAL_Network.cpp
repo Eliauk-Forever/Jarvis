@@ -85,6 +85,11 @@ void HAL::Wifi_Config()
   server.begin();
 }
 
+void HAL::Wifi_Close()
+{
+	WiFi.mode(WIFI_OFF);
+}
+
 //用于上电自动连接WiFi
 bool HAL::AutoConfig()
 {

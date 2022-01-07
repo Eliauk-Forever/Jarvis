@@ -73,6 +73,14 @@ void wifi_detect(lv_timer_t * timer2)		    //检测是否连接WIFI，连接成�
         currentYear = ptm->tm_year+1900;
         timeClient.end();
         rtc.setTime(currentSecond, currentMinute, currentHour, monthDay, currentMonth, currentYear);
+
+		HAL::Wifi_Close();
+		Wifi_status = 0;
+		lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
+		lv_label_set_text(status, "#3299CC WIFI已关闭#");
+		lv_label_set_text(SSID, "");
+		lv_label_set_text(IP, "");
+
         lv_timer_resume(timer3);
         lv_timer_resume(timer4);
 		lv_timer_ready(timer4);
@@ -207,7 +215,7 @@ void page_setting()
     timer3 = lv_timer_create(time_update, 1000, NULL);      //创建一个定时器来更新时间
     lv_timer_pause(timer3);
 
-    timer4 = lv_timer_create(day_update, 86400, NULL);      //创建一个定时器来更新日期
+    timer4 = lv_timer_create(day_update, 86400000, NULL);      //创建一个定时器来更新日期
     lv_timer_pause(timer4);
 
 	label_SSID = lv_label_create(container);

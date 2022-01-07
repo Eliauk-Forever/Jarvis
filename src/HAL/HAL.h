@@ -23,6 +23,7 @@ namespace HAL
 	void Init();
 	void Update();
     void Wifi_Connect();
+    void Wifi_Close();
 
 /* SD */
     bool SD_Init();
