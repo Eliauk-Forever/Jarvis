@@ -48,7 +48,7 @@ void touchpad_read( lv_indev_drv_t * indev_driver, lv_indev_data_t * data )
     }
 }
 
-void screen_init()
+void Screen_Init()
 {
     tft.begin(); /* TFT init */
     tft.setRotation(1);

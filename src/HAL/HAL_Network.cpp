@@ -1,6 +1,6 @@
 #include "HAL.h"
 
-uint8_t Wifi_status;
+uint8_t Wifi_status = 0;	//0 -> 未连接, 1 -> AP模式, 2 -> STA模式
 
 const char* AP_SSID  = "ESP32_Config"; //热点名称
 String wifi_ssid = "";
@@ -72,15 +72,12 @@ void HAL::Wifi_Config()
       	}
     }
 	Wifi_status = 1;
-	if(Wifi_status)
-	{
-		Serial.println("");
-    	Serial.println("WIFI Config Success");
-    	Serial.printf("SSID:%s", WiFi.SSID().c_str());
-    	Serial.print("  LocalIP:");
-    	Serial.print(WiFi.localIP());
-    	Serial.println("");
-	}
+	Serial.println("");
+    Serial.println("WIFI Config Success");
+    Serial.printf("SSID:%s", WiFi.SSID().c_str());
+    Serial.print("  LocalIP:");
+    Serial.print(WiFi.localIP());
+    Serial.println("");
   });
   server.begin();
 }
@@ -88,6 +85,7 @@ void HAL::Wifi_Config()
 void HAL::Wifi_Close()
 {
 	WiFi.mode(WIFI_OFF);
+	Wifi_status = 0;
 }
 
 //用于上电自动连接WiFi
@@ -99,6 +97,7 @@ bool HAL::AutoConfig()
   	  	int wstatus = WiFi.status();
   	  	if (wstatus == WL_CONNECTED)
   	  	{
+			Wifi_status = 2;
   	  	  	Serial.println("WIFI SmartConfig Success");
   	  	  	Serial.printf("SSID:%s", WiFi.SSID().c_str());
   	  	  	Serial.printf(", PSW:%s\r\n", WiFi.psk().c_str());

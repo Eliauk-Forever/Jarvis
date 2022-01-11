@@ -6,3 +6,7 @@
 | Software | V2.0        |
 | System   | LVGL　V８.１.０ |
 | MCU      | ＥＳＰ３２       |
+
+#Last update
+
+2022/1/11

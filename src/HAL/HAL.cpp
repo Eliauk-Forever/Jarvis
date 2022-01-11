@@ -7,7 +7,8 @@ void HAL::Init()
 {
 	Wire.begin();
 	Serial.begin(115200);
-	for(int i=0; i<17; i=i+8) 
+
+	for(int i=0; i<17; i=i+8) 		//获取芯片ID
 	{
 	  CHIP_ID |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
 	}
@@ -20,11 +21,11 @@ void HAL::Init()
 	Serial.print("CHIP_ID: ");
 	Serial.println(CHIP_ID);
     Serial.print("Author: " VERSION_AUTHOR_NAME);
-	Serial.println("");
+	Serial.println("\n");
 
 	HAL::SD_Init();	
 
-	setCpuFrequencyMhz(240);
+	// setCpuFrequencyMhz(240);
 }
 
 void HAL::Wifi_Connect()

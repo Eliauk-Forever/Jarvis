@@ -14,7 +14,6 @@
 #include <esp_wifi.h>
 #include <HTTPClient.h>
 #include "Version.h"
-#include "CommonMacro.h"
 
 extern uint8_t Wifi_status;
 
@@ -32,6 +31,7 @@ namespace HAL
 /* WIFI */
     bool AutoConfig();
     void Wifi_Config();
+    void Wifi_Close();
     void HandleClient();
 
 /* Sensor */

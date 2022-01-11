@@ -3,16 +3,16 @@
 #include "page_setting.h"
 
 lv_obj_t* table, * sw, * btn_exit, * status, * label_SSID, * label_IP, * SSID, * IP;
+lv_timer_t* timer1, * timer2, * timer3, * timer4;	
+
+//温湿度变量
 float temp, humi;
 uint8_t t, h;
-
-lv_timer_t * timer1, * timer2, * timer3, * timer4;
 
 ESP32Time rtc;
 WiFiUDP ntpUDP;
 
 NTPClient timeClient(ntpUDP,"pool.ntp.org");  //NTP服务器地址
-uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
 
 String ip2Str(IPAddress ip)		//IP地址转字符串
 { 
@@ -32,7 +32,7 @@ void sensor_measure(lv_timer_t * timer1)    //每2s执行一次
         Serial.print(temp);
         Serial.print(F(" °C, humidity is "));
         Serial.print(humi);
-        Serial.println("%RH");
+        Serial.println(" %");
 
 		t = char(temp);
 		h = char(humi);
@@ -50,13 +50,10 @@ void sensor_measure(lv_timer_t * timer1)    //每2s执行一次
     }
 }
 
-void wifi_detect(lv_timer_t * timer2)		    //检测是否连接WIFI，连接成功后显示SSID和IP地址并暂停定时器
+void wifi_detect(lv_timer_t * timer2)		    //检测当前WIFI状态，连接成功后显示SSID和IP地址并打开时间和日期更新的定时器
 {
-	if(Wifi_status)
+	if(Wifi_status == 1 && Wifi_status == 2)
 	{
-		lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
-		lv_label_set_text(SSID, WiFi.SSID().c_str());
-		lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
         timeClient.begin();
         timeClient.setTimeOffset(28800);        //设置偏移时间（以秒为单位）以调整时区
         timeClient.update();
@@ -74,27 +71,34 @@ void wifi_detect(lv_timer_t * timer2)		    //检测是否连接WIFI，连接成�
         timeClient.end();
         rtc.setTime(currentSecond, currentMinute, currentHour, monthDay, currentMonth, currentYear);
 
-		HAL::Wifi_Close();
-		Wifi_status = 0;
-		lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
-		lv_label_set_text(status, "#3299CC WIFI已关闭#");
-		lv_label_set_text(SSID, "");
-		lv_label_set_text(IP, "");
+        lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
 
-        lv_timer_resume(timer3);
+		if(Wifi_status == 1)
+		{
+			lv_label_set_text(status, "#BC1717 WEB配网#");
+			lv_label_set_text(SSID, "ESP32_Config");
+			lv_label_set_text(IP, ip2Str(WiFi.softAPIP()).c_str());
+
+			lv_timer_pause(timer2);
+		}
+		if(Wifi_status == 2)
+		{
+			lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
+			lv_label_set_text(SSID, WiFi.SSID().c_str());
+			lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
+		}
+
+		lv_timer_resume(timer3);
         lv_timer_resume(timer4);
-		lv_timer_ready(timer4);
+        lv_timer_ready(timer4);
 		lv_timer_pause(timer2);
 	}
-	else
-	{
-		lv_label_set_text(status, "#BC1717 未连接WIFI#");
-		lv_label_set_text(SSID, "ESP32_Config");
-		lv_label_set_text(IP, ip2Str(WiFi.softAPIP()).c_str());
-	}
+	// lv_label_set_text(status, "#3299CC WIFI已关闭#");
+	// lv_label_set_text(SSID, "");
+	// lv_label_set_text(IP, "");
 }
 
-void time_update(lv_timer_t * timer3)       //每1s执行一次
+void time_update(lv_timer_t * timer2)       //通过RTC获取时间,每1s执行一次
 {
     currentHour = rtc.getHour(true);
     currentMinute = rtc.getMinute();
@@ -103,7 +107,7 @@ void time_update(lv_timer_t * timer3)       //每1s执行一次
     //Serial.println(rtc.getTime("%Y %d %d  %H:%M:%S  %A"));
 }
 
-void day_update(lv_timer_t * timer4)        //每86500s（一天）执行一次
+void day_update(lv_timer_t * timer3)        //日期更新,每86500s（一天）执行一次
 {
     currentYear = rtc.getYear();
     currentMonth = rtc.getMonth() + 1;
@@ -119,9 +123,9 @@ void day_update(lv_timer_t * timer4)        //每86500s（一天）执行一次
 static void back_keep_cb(lv_event_t* LV_EVENT_PRESSED)
 {
 	lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 50, 100, false);		//退出后保留页面
-	lv_timer_pause(timer2);
 }
 
+//温湿度传感器开关事件
 static void event_handler(lv_event_t* a)
 {
 	lv_event_code_t code = lv_event_get_code(a);
@@ -145,20 +149,50 @@ static void event_handler(lv_event_t* a)
 void page_setting()
 {
 	lv_obj_t* tabview = lv_tabview_create(scr_setting, LV_DIR_TOP, 50);
-
+	lv_obj_set_scrollbar_mode(tabview, LV_SCROLLBAR_MODE_ACTIVE);
+	
 	lv_obj_t* tab1 = lv_tabview_add_tab(tabview, LV_SYMBOL_LIST);
 	lv_obj_t* tab2 = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME);
 	lv_obj_t* tab3 = lv_tabview_add_tab(tabview, LV_SYMBOL_SETTINGS);
 
-	lv_obj_t* text1 = lv_label_create(tab1);
-	lv_obj_t* text2 = lv_label_create(tab1);
+	lv_obj_t* container1 = lv_obj_create(tab1);
+	lv_obj_t* container2 = lv_obj_create(tab1);
+	lv_obj_clear_flag(container2, LV_OBJ_FLAG_SCROLLABLE);
+
+	lv_obj_t* text1 = lv_label_create(container2);
+	lv_obj_t* text2 = lv_label_create(container2);
 	lv_obj_t* text3 = lv_label_create(tab2);
 
 	lv_obj_set_style_text_font(text1, &myfont, 0);
 	lv_obj_set_style_text_font(text2, &myfont, 0);
 	lv_obj_set_style_text_font(text3, &myfont, 0);
 
-	//tab1显示的内容（关于本机）
+	//tab1显示的内容（WIFI信息 & 关于本机）
+	lv_obj_set_size(container1, 280, 120);
+	lv_obj_align(container1, LV_ALIGN_TOP_MID, 0, 0);
+
+	status = lv_label_create(container1);
+	lv_label_set_recolor(status, true);
+	lv_obj_set_style_text_font(status, &myfont, 0);
+	lv_obj_align(status, LV_ALIGN_TOP_MID, 0, 0);
+
+	label_SSID = lv_label_create(container1);
+	lv_obj_align(label_SSID, LV_ALIGN_LEFT_MID, 5, 0);
+	lv_label_set_text(label_SSID, "SSID: ");
+
+	SSID = lv_label_create(container1);
+	lv_obj_align_to(SSID, label_SSID, LV_ALIGN_LEFT_MID, 80, 0);
+	
+	label_IP = lv_label_create(container1);
+	lv_obj_align(label_IP, LV_ALIGN_LEFT_MID, 5, 30);
+	lv_label_set_text(label_IP, "IP: ");
+
+	IP = lv_label_create(container1);
+	lv_obj_align_to(IP, label_IP, LV_ALIGN_LEFT_MID, 80, 0);
+
+	lv_obj_set_size(container2, 280, 180);
+	lv_obj_align_to(container2, container1, LV_ALIGN_BOTTOM_MID, 0, 20);
+
 	lv_label_set_text(text1, "名称\n"                             
 							 "系统\n"
 							 "硬件版本\n"
@@ -173,12 +207,12 @@ void page_setting()
 							 VERSION_MCU
 							 VERSION_AUTHOR_NAME);
 
-	lv_obj_align_to(text2, text1, LV_ALIGN_TOP_LEFT, 165, 1);
+	lv_obj_align_to(text2, text1, LV_ALIGN_TOP_LEFT, 135, 1);
 
 	//tab2显示的内容（环境温湿度）
 	if(HAL::AHT_begin())
 	{
-		timer1 = lv_timer_create(sensor_measure, 2000, NULL);		//创建一个定时器用于获取温湿度传感器测量值
+		timer1 = lv_timer_create(sensor_measure, 3000, NULL);		//创建一个定时器用于获取温湿度传感器测量值
 		lv_timer_pause(timer1);
 	}
 
@@ -199,45 +233,22 @@ void page_setting()
 	lv_table_set_cell_value(table, 0, 1, "°C");
 	lv_table_set_cell_value(table, 1, 1, "%");
 
-	//tab3显示的内容（WIFI状态 & 退出按钮）
-	lv_obj_t* container = lv_obj_create(tab3);
-	lv_obj_set_size(container, 280, 120);
-	lv_obj_align(container, LV_ALIGN_TOP_MID, 0, 0);
-
-	status = lv_label_create(container);
-	lv_label_set_recolor(status, true);
-	lv_obj_set_style_text_font(status, &myfont, 0);
-	lv_obj_align(status, LV_ALIGN_TOP_MID, 0, 0);
-
-	timer2 = lv_timer_create(wifi_detect, 2000, NULL);		//创建一个定时器来检测WIFI是否连接
-	lv_timer_resume(timer2);
-	
-    timer3 = lv_timer_create(time_update, 1000, NULL);      //创建一个定时器来更新时间
-    lv_timer_pause(timer3);
-
-    timer4 = lv_timer_create(day_update, 86400000, NULL);      //创建一个定时器来更新日期
-    lv_timer_pause(timer4);
-
-	label_SSID = lv_label_create(container);
-	lv_obj_align(label_SSID, LV_ALIGN_LEFT_MID, 5, 0);
-	lv_label_set_text(label_SSID, "SSID: ");
-
-	SSID = lv_label_create(container);
-	lv_obj_align_to(SSID, label_SSID, LV_ALIGN_LEFT_MID, 80, 0);
-	
-	label_IP = lv_label_create(container);
-	lv_obj_align(label_IP, LV_ALIGN_LEFT_MID, 5, 30);
-	lv_label_set_text(label_IP, "IP: ");
-
-	IP = lv_label_create(container);
-	lv_obj_align_to(IP, label_IP, LV_ALIGN_LEFT_MID, 80, 0);
-
+	//tab3显示的内容（WIFI开关 & 退出按钮）
 	btn_exit = lv_btn_create(tab3);
 	lv_obj_set_size(btn_exit, 100, 30);
-	lv_obj_align_to(btn_exit, container, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+	lv_obj_align(btn_exit, LV_ALIGN_CENTER, 0, 50);
 
 	lv_obj_t* label_exit = lv_label_create(btn_exit);
 	lv_obj_center(label_exit);
 	lv_label_set_text(label_exit, "exit");
 	lv_obj_add_event_cb(btn_exit, back_keep_cb, LV_EVENT_PRESSED, NULL);
+
+    timer1 = lv_timer_create(wifi_detect, 5000, NULL);		//创建一个定时器来检测WIFI是否连接
+	lv_timer_ready(timer2);     //使定时器立即开启
+	
+    timer2 = lv_timer_create(time_update, 1000, NULL);      //创建一个定时器来更新时间
+    lv_timer_pause(timer3);     //暂停定时器,连接wifi后开启
+
+    timer3 = lv_timer_create(day_update, 86400000, NULL);      //创建一个定时器来更新日期
+    lv_timer_pause(timer4);     //暂停定时器,连接wifi后开启
 }

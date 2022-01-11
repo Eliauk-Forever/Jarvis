@@ -1,18 +1,18 @@
 #include "page_control.h"
 #include "page_calendar.h"
 #include "page_infrared.h"
+#include "page_time.h"
 #include "page_setting.h"
 
 LV_FONT_DECLARE(myfont);
-LV_IMG_DECLARE(desktop);
 LV_IMG_DECLARE(setup);
+LV_IMG_DECLARE(desktop);
 
 lv_obj_t* scr_setup, * scr_home, * scr_setting, * scr_weather, * scr_infrared, * scr_music, * scr_calendar, * scr_time;
 lv_obj_t* bg_setup, * bg_desktop;
 lv_obj_t* symbol_wifi, * btn_back, * home_time;
-lv_style_t font_size_S, font_size_M, font_size_L;
 
-//static lv_style_t style_pr;
+uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
 
 static void back_delete_cb(lv_event_t* LV_EVENT_LONG_PRESSED)
 {
@@ -48,7 +48,7 @@ static void btn3_event_cb(lv_event_t * LV_EVENT_RELEASED)       //日历
     lv_label_set_text(lunar, "壬寅虎年");
     lv_obj_center(lunar);
 
-    lv_obj_add_event_cb(btn_back, back_delete_cb, LV_EVENT_PRESSED, NULL);
+    //lv_obj_add_event_cb(btn_back, back_delete_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_event_cb(scr_calendar, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_calendar();
 }
@@ -58,6 +58,7 @@ static void btn4_event_cb(lv_event_t * LV_EVENT_RELEASED)       //时钟
     scr_time = lv_obj_create(NULL);
     lv_scr_load_anim(scr_time, LV_SCR_LOAD_ANIM_FADE_ON, 100, 200, false);
     lv_obj_add_event_cb(scr_time, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    page_time();
 }
 
 static void btn5_event_cb(lv_event_t * LV_EVENT_RELEASED)       //音乐
@@ -69,19 +70,14 @@ static void btn5_event_cb(lv_event_t * LV_EVENT_RELEASED)       //音乐
 
 static void btn6_event_cb(lv_event_t * LV_EVENT_RELEASED)       //设置
 {
+    scr_setting = lv_obj_create(NULL);  
     lv_scr_load_anim(scr_setting, LV_SCR_LOAD_ANIM_FADE_ON, 100, 200, false);
+    page_setting();
 }
 
 void page_init()
 {
-    //字体、背景主题初始化
-    lv_style_init(&font_size_S);
-    lv_style_init(&font_size_M);
-    lv_style_init(&font_size_L);
-    lv_style_set_text_font(&font_size_S, &lv_font_montserrat_20);
-    lv_style_set_text_font(&font_size_M, &lv_font_montserrat_32);
-    lv_style_set_text_font(&font_size_L, &lv_font_montserrat_48);
-
+    //背景主题初始化
     scr_setup = lv_obj_create(NULL);
     lv_scr_load(scr_setup);
 
@@ -91,23 +87,6 @@ void page_init()
     lv_obj_t* spinner_start = lv_spinner_create(bg_setup, 3000, 15);
     lv_obj_set_size(spinner_start, 45, 45);
     lv_obj_align(spinner_start, LV_ALIGN_BOTTOM_RIGHT, -15, -15);
-
-    //按键主题初始化
-    // lv_style_init(&style_pr);
-
-    // lv_style_set_outline_width(&style_pr, 30);
-    // lv_style_set_outline_opa(&style_pr, LV_OPA_TRANSP);
-
-    // lv_style_set_translate_y(&style_pr, 5);
-    // lv_style_set_shadow_ofs_y(&style_pr, 3);
-    // lv_style_set_bg_color(&style_pr, lv_palette_darken(LV_PALETTE_BLUE, 2));
-    // lv_style_set_bg_grad_color(&style_pr, lv_palette_darken(LV_PALETTE_BLUE, 4));
-
-    // static lv_style_transition_dsc_t trans;
-    // static lv_style_prop_t props[] = { LV_STYLE_OUTLINE_WIDTH, LV_STYLE_OUTLINE_OPA, 0 };
-    // lv_style_transition_dsc_init(&trans, props, lv_anim_path_linear, 300, 0, NULL);
-
-    // lv_style_set_transition(&style_pr, &trans);
 }
 
 void page_home()
@@ -125,6 +104,7 @@ void page_home()
 
     lv_label_set_text(symbol1, LV_SYMBOL_HOME);
     lv_label_set_text(home_time, "--:--:--");
+    lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
     lv_label_set_text(symbol2, LV_SYMBOL_BATTERY_2);
 
     lv_obj_set_pos(symbol1, 10, 10);
@@ -133,7 +113,6 @@ void page_home()
     lv_obj_set_pos(symbol2, 275, 10);
     
     lv_obj_t* btn1 = lv_btn_create(bg_desktop);
-    //lv_obj_add_style(btn1, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_size(btn1, 60, 60);
     lv_obj_align(btn1, LV_ALIGN_CENTER, -100, -30);
 
@@ -143,7 +122,6 @@ void page_home()
     lv_obj_center(label_btn1);
 
     lv_obj_t* btn2 = lv_btn_create(bg_desktop);
-    //lv_obj_add_style(btn2, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_size(btn2, 60, 60);
     lv_obj_align(btn2, LV_ALIGN_CENTER, 0, -30);
 
@@ -157,7 +135,6 @@ void page_home()
     lv_obj_align(btn3, LV_ALIGN_CENTER, 100, -30);
 
     lv_obj_t* label_btn3 = lv_label_create(btn3);
-    //lv_obj_add_style(btn3, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_style_text_font(label_btn3, &myfont, 0);
     lv_label_set_text(label_btn3, "日历");
     lv_obj_center(label_btn3);
@@ -167,13 +144,11 @@ void page_home()
     lv_obj_align(btn4, LV_ALIGN_CENTER, -100, 65);
 
     lv_obj_t* label_btn4 = lv_label_create(btn4);
-    //lv_obj_add_style(btn4, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
     lv_label_set_text(label_btn4, "时钟");
     lv_obj_center(label_btn4);
 
     lv_obj_t* btn5 = lv_btn_create(bg_desktop);
-    //lv_obj_add_style(btn5, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_size(btn5, 60, 60);
     lv_obj_align(btn5, LV_ALIGN_CENTER, 0, 65);
 
@@ -187,18 +162,21 @@ void page_home()
     lv_obj_align(btn6, LV_ALIGN_CENTER, 100, 65);
 
     lv_obj_t* label_btn6 = lv_label_create(btn6);
-    //lv_obj_add_style(btn6, &style_pr, LV_STATE_PRESSED);
     lv_obj_set_style_text_font(label_btn6, &myfont, 0);
     lv_label_set_text(label_btn6, "设置");
     lv_obj_center(label_btn6);
 
-    scr_setting = lv_obj_create(NULL);
-    page_setting();
-    
+    //创建按钮点击事件,跳转页面
     lv_obj_add_event_cb(btn1, btn1_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn2, btn2_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn3, btn3_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn4, btn4_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn5, btn5_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_RELEASED, NULL); 
+    lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_RELEASED, NULL);
+}
+
+void Gui_Init(void)
+{
+    page_init();
+    page_home();
 }

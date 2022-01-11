@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-extern uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
-
 void page_setting();
 
 #ifdef __cplusplus
