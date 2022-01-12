@@ -102,7 +102,6 @@ bool HAL::AutoConfig()
   	  	int wstatus = WiFi.status();
   	  	if (wstatus == WL_CONNECTED)
   	  	{
-            Wifi_status = 2;
   	  	  	Serial.println("WIFI SmartConfig Success");
   	  	  	Serial.printf("SSID:%s", WiFi.SSID().c_str());
   	  	  	Serial.printf(", PSW:%s\r\n", WiFi.psk().c_str());

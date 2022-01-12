@@ -149,18 +149,20 @@ static void wifi_event_handler(lv_event_t* b)
 	{
 		if (lv_obj_has_state(obj, LV_STATE_CHECKED))
 		{
-			if(HAL::AutoConfig())
+            if(HAL::AutoConfig())
             {
-                lv_timer_pause(timer2);
+                lv_timer_resume(timer2);
+                Wifi_status = 2;
                 lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
-		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
+		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());  
             }
 		}
 		else
 		{
-            lv_timer_resume(timer2);
+            lv_timer_pause(timer2);
 			HAL::Wifi_Close();
+            Wifi_status = 0;
             lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
 		    lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		    lv_label_set_text(SSID, "");
