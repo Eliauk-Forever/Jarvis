@@ -1,6 +1,6 @@
 #include "HAL.h"
 
-uint8_t Wifi_status = 0;	//0 -> 未连接, 1 -> AP模式, 2 -> STA模式
+uint8_t Wifi_status = 0;	//0 -> 未连接, 1 -> AP模式, 2 -> STA模式, 3->连接中
 
 const char* AP_SSID  = "ESP32_Config"; //热点名称
 String wifi_ssid = "";
@@ -31,6 +31,8 @@ void HAL::Wifi_Config()
     	ESP.restart();  //复位esp32
   	}
 
+    Wifi_status = 1;
+    
   	if (MDNS.begin("esp32")) 
   	{
   	  	Serial.println("MDNS responder started");
@@ -47,11 +49,14 @@ void HAL::Wifi_Config()
 
     server.send(200, "text/html", "<html><body><font size=\"10\">successd,wifi connecting...<br />Please close this page!</font></body></html>");
 
+    Wifi_status = 3;
+
     WiFi.softAPdisconnect(true);
     //获取输入的WIFI账户和密码
     wifi_ssid = server.arg("ssid");
     wifi_pass = server.arg("pass");
     server.close();
+
     WiFi.softAPdisconnect();
     Serial.println("WiFi Connect SSID:" + wifi_ssid + "  PASS:" + wifi_pass);
 
@@ -71,13 +76,13 @@ void HAL::Wifi_Config()
       	  	ESP.restart();
       	}
     }
-	Wifi_status = 1;
 	Serial.println("");
     Serial.println("WIFI Config Success");
     Serial.printf("SSID:%s", WiFi.SSID().c_str());
     Serial.print("  LocalIP:");
     Serial.print(WiFi.localIP());
     Serial.println("");
+    Wifi_status = 2;
   });
   server.begin();
 }
@@ -97,7 +102,7 @@ bool HAL::AutoConfig()
   	  	int wstatus = WiFi.status();
   	  	if (wstatus == WL_CONNECTED)
   	  	{
-			Wifi_status = 2;
+            Wifi_status = 2;
   	  	  	Serial.println("WIFI SmartConfig Success");
   	  	  	Serial.printf("SSID:%s", WiFi.SSID().c_str());
   	  	  	Serial.printf(", PSW:%s\r\n", WiFi.psk().c_str());

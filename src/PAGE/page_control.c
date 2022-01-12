@@ -48,7 +48,7 @@ static void btn3_event_cb(lv_event_t * LV_EVENT_RELEASED)       //日历
     lv_label_set_text(lunar, "壬寅虎年");
     lv_obj_center(lunar);
 
-    //lv_obj_add_event_cb(btn_back, back_delete_cb, LV_EVENT_PRESSED, NULL);
+    lv_obj_add_event_cb(btn_back, back_delete_cb, LV_EVENT_PRESSED, NULL);
     lv_obj_add_event_cb(scr_calendar, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_calendar();
 }
@@ -57,7 +57,6 @@ static void btn4_event_cb(lv_event_t * LV_EVENT_RELEASED)       //时钟
 {
     scr_time = lv_obj_create(NULL);
     lv_scr_load_anim(scr_time, LV_SCR_LOAD_ANIM_FADE_ON, 100, 200, false);
-    lv_obj_add_event_cb(scr_time, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_time();
 }
 
@@ -70,9 +69,7 @@ static void btn5_event_cb(lv_event_t * LV_EVENT_RELEASED)       //音乐
 
 static void btn6_event_cb(lv_event_t * LV_EVENT_RELEASED)       //设置
 {
-    scr_setting = lv_obj_create(NULL);  
     lv_scr_load_anim(scr_setting, LV_SCR_LOAD_ANIM_FADE_ON, 100, 200, false);
-    page_setting();
 }
 
 void page_init()
@@ -165,7 +162,7 @@ void page_home()
     lv_obj_set_style_text_font(label_btn6, &myfont, 0);
     lv_label_set_text(label_btn6, "设置");
     lv_obj_center(label_btn6);
-
+    
     //创建按钮点击事件,跳转页面
     lv_obj_add_event_cb(btn1, btn1_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn2, btn2_event_cb, LV_EVENT_RELEASED, NULL);
@@ -173,6 +170,9 @@ void page_home()
     lv_obj_add_event_cb(btn4, btn4_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn5, btn5_event_cb, LV_EVENT_RELEASED, NULL);
     lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_RELEASED, NULL);
+
+    scr_setting = lv_obj_create(NULL); 
+    page_setting(); 
 }
 
 void Gui_Init(void)

@@ -12,7 +12,15 @@ uint8_t Hour, Minute, Second;
 
 lv_obj_t* shizhen, * fenzhen, * miaozhen;
 
-static void time_update(lv_timer_t* timer1)
+lv_timer_t* timer5;
+
+static void back_delete_cb(lv_event_t* LV_EVENT_LONG_PRESSED)
+{
+    lv_timer_del(timer5);
+    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 50, 100, true);        //退出后删除页面
+}
+
+static void time_update(lv_timer_t* timer5)
 {
     if (shizhen != NULL)
     {
@@ -20,7 +28,7 @@ static void time_update(lv_timer_t* timer1)
         lv_img_set_angle(shizhen, shi);
         lv_img_set_angle(fenzhen, Minute * 6 * 10);
         lv_img_set_angle(miaozhen, Second * 6 * 10);
-        printf("%02d:%02d:%02d\n", Hour, Minute, Second);
+        //Serial.printfln("%02d:%02d:%02d", Hour, Minute, Second);
     }
 
     if (++Second >= 60)
@@ -64,6 +72,8 @@ void page_time()
     lv_obj_center(miaozhen);
     lv_img_set_angle(miaozhen, Second * 60);
 
-    lv_timer_t* timer1 = lv_timer_create(time_update, 1000, NULL);
-    lv_timer_ready(timer1);
+    timer5 = lv_timer_create(time_update, 1000, NULL);
+    lv_timer_ready(timer5);
+
+    lv_obj_add_event_cb(scr_time, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
 }

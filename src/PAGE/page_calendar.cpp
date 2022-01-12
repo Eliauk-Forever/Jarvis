@@ -27,7 +27,6 @@ void page_calendar()
     current_date = lv_label_create(scr_calendar);
 
     lv_obj_set_pos(current_date, 180, 15);
-    lv_label_set_text_fmt(current_date, "%02d/%02d/%02d", currentYear, currentMonth, monthDay);
     
     lv_obj_set_size(calendar, 280, 180);
     lv_obj_align(calendar, LV_ALIGN_CENTER, 0, 20);
@@ -35,11 +34,13 @@ void page_calendar()
 
     if(Wifi_status == 2)
     {
+        lv_label_set_text_fmt(current_date, "%02d/%02d/%02d", currentYear, currentMonth, monthDay);
         lv_calendar_set_today_date(calendar, currentYear, currentMonth, monthDay);
         lv_calendar_set_showed_date(calendar, currentYear, currentMonth);
     }
     else
     {
+        lv_label_set_text_fmt(current_date, "%02d/%02d/%02d", 2020, 1, 1);
         lv_calendar_set_today_date(calendar, 2020, 1, 1);
         lv_calendar_set_showed_date(calendar, 2020, 1);
     }
