@@ -1,6 +1,5 @@
 #include "HAL/HAL.h"
 #include "page_control.h"
-#include "page_setting.h"
 #include "page_time.h"
 
 LV_IMG_DECLARE(bg_time);

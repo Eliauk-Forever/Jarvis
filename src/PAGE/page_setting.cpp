@@ -3,16 +3,11 @@
 #include "page_setting.h"
 
 lv_obj_t* table, * sw, * btn_exit, * status, * label_SSID, * label_IP, * SSID, * IP;
-lv_timer_t* timer1, * timer2, * timer3, * timer4;
+lv_timer_t* timer4;
 
 //温湿度变量
 float temp, humi;
 uint8_t t, h;
-
-ESP32Time rtc;
-WiFiUDP ntpUDP;
-
-NTPClient timeClient(ntpUDP,"pool.ntp.org");  //NTP服务器地址
 
 String ip2Str(IPAddress ip)		//IP地址转字符串
 { 
@@ -24,7 +19,7 @@ String ip2Str(IPAddress ip)		//IP地址转字符串
     return s;
 }
 
-void sensor_measure(lv_timer_t * timer1)    //每2s执行一次
+void sensor_measure(lv_timer_t * timer4)    //每2s执行一次
 {
 	if (HAL::AHT_measure(&temp, &humi)) 
     {
@@ -50,74 +45,21 @@ void sensor_measure(lv_timer_t * timer1)    //每2s执行一次
     }
 }
 
-void wifi_detect(lv_timer_t * timer2)		    //检测当前WIFI状态，连接成功后显示SSID和IP地址并打开时间和日期更新的定时器
-{
-	if(Wifi_status == 1)
-	{
-		lv_label_set_text(status, "#BC1717 WEB配网#");
-		lv_label_set_text(SSID, "ESP32_Config");
-		lv_label_set_text(IP, ip2Str(WiFi.softAPIP()).c_str());
-	}
-
-	if(Wifi_status == 2)
-	{
-        timeClient.begin();
-        timeClient.setTimeOffset(28800);        //设置偏移时间（以秒为单位）以调整时区
-        timeClient.update();
-        unsigned long epochTime = timeClient.getEpochTime();
-        currentHour = timeClient.getHours();    //获取时间
-        currentMinute = timeClient.getMinutes();
-        currentSecond = timeClient.getSeconds();
-        weekDay = timeClient.getDay();
-        //将epochTime换算成年月日
-        struct tm *ptm = gmtime ((time_t *)&epochTime);
-        monthDay = ptm->tm_mday;
-        currentMonth = ptm->tm_mon+1;
-        currentYear = ptm->tm_year+1900;
-        timeClient.end();
-        rtc.setTime(currentSecond, currentMinute, currentHour, monthDay, currentMonth, currentYear);
-        lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
-
-		lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
-		lv_label_set_text(SSID, WiFi.SSID().c_str());
-		lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
-
-        lv_timer_resume(timer3);
-        lv_timer_resume(timer4);
-	}
-
-    if(Wifi_status == 3)
-    {
-        lv_label_set_text(status, "#BC1717 连接中...#");
-    }
-}
-
-void time_update(lv_timer_t * timer3)       //通过RTC获取时间,每1s执行一次
-{
-    currentHour = rtc.getHour(true);
-    currentMinute = rtc.getMinute();
-    currentSecond = rtc.getSecond();
-    lv_label_set_text_fmt(home_time, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
-    //Serial.println(rtc.getTime("%Y %d %d  %H:%M:%S  %A"));
-}
-
-void day_update(lv_timer_t * timer4)        //日期更新,每1h执行一次
-{
-    currentYear = rtc.getYear();
-    currentMonth = rtc.getMonth() + 1;
-    monthDay = rtc.getDay();
-	Serial.print("CurrentDay : ");
-	Serial.print(currentYear);
-	Serial.print("/");
-	Serial.print(currentMonth);
-	Serial.print("/");
-	Serial.println(monthDay);
-    lv_timer_set_period(timer4, 3600000);
-}
-
 static void back_keep_cb(lv_event_t* LV_EVENT_PRESSED)
 {
-	lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 50, 100, false);		//退出后保留页面
+    lv_timer_del(timer4);
+
+    if(Wifi_status == 2)
+    {
+        lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
+    }
+
+    if(Wifi_status == 0 || Wifi_status == 1)
+    {
+        lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
+    }
+
+	lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 50, 100, true);
 }
 
 //温湿度传感器开关事件
@@ -129,11 +71,11 @@ static void aht_event_handler(lv_event_t* a)
 	{
 		if (lv_obj_has_state(obj, LV_STATE_CHECKED))
 		{   
-			lv_timer_resume(timer1);
+			lv_timer_resume(timer4);
 		}
 		else
 		{
-			lv_timer_pause(timer1);
+			lv_timer_pause(timer4);
 			lv_table_set_cell_value(table, 0, 1, "°C");
 			lv_table_set_cell_value(table, 1, 1, " RH");
 			lv_table_set_cell_value(table, 2, 1, ""); 
@@ -151,19 +93,16 @@ static void wifi_event_handler(lv_event_t* b)
 		{
             if(HAL::AutoConfig())
             {
-                lv_timer_resume(timer2);
                 Wifi_status = 2;
                 lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
-		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());  
+		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());      
             }
 		}
 		else
 		{
-            lv_timer_pause(timer2);
 			HAL::Wifi_Close();
             Wifi_status = 0;
-            lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
 		    lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		    lv_label_set_text(SSID, "");
 		    lv_label_set_text(IP, "");
@@ -215,6 +154,27 @@ void page_setting()
 	IP = lv_label_create(container_Wifi);
 	lv_obj_align_to(IP, label_IP, LV_ALIGN_LEFT_MID, 80, 0);
 
+    if(Wifi_status == 0)
+    {
+		lv_label_set_text(status, "#3299CC WIFI已关闭#");
+		lv_label_set_text(SSID, "");
+		lv_label_set_text(IP, "");
+    }
+
+    if(Wifi_status == 1)
+    {
+        lv_label_set_text(status, "#BC1717 WEB配网#");
+		lv_label_set_text(SSID, "ESP32_Config");
+		lv_label_set_text(IP, ip2Str(WiFi.softAPIP()).c_str());
+    }
+
+    if(Wifi_status == 2)
+    {
+		lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
+		lv_label_set_text(SSID, WiFi.SSID().c_str());
+		lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
+    }
+
 	lv_obj_set_size(container_About, 280, 190);
 	lv_obj_align(container_About, LV_ALIGN_TOP_MID, 0, 130);
 
@@ -241,8 +201,8 @@ void page_setting()
 
 	if(HAL::AHT_begin())
 	{
-		timer1 = lv_timer_create(sensor_measure, 3000, NULL);		//创建一个定时器用于获取温湿度传感器测量值
-		lv_timer_pause(timer1);
+		timer4 = lv_timer_create(sensor_measure, 3000, NULL);		//创建一个定时器用于获取温湿度传感器测量值
+		lv_timer_pause(timer4);
 	}
 
 	lv_label_set_text(text3, "传感器开关");                      
@@ -270,7 +230,10 @@ void page_setting()
 	lv_obj_align(text4, LV_ALIGN_TOP_LEFT, 20, 0);
 
     lv_obj_t* sw_wifi = lv_switch_create(tab3);                       //创建一个开关用于控制Wifi
-    lv_obj_add_state(sw_wifi, LV_STATE_CHECKED);
+    if(Wifi_status == 2)
+    {
+        lv_obj_add_state(sw_wifi, LV_STATE_CHECKED);
+    }   
 	lv_obj_align_to(sw_wifi, text4, LV_ALIGN_TOP_RIGHT, 100, 0);
 	lv_obj_add_event_cb(sw_wifi, wifi_event_handler, LV_EVENT_ALL, NULL);
 
@@ -282,13 +245,4 @@ void page_setting()
 	lv_obj_center(label_exit);
 	lv_label_set_text(label_exit, "exit");
 	lv_obj_add_event_cb(btn_exit, back_keep_cb, LV_EVENT_PRESSED, NULL);
-
-    timer2 = lv_timer_create(wifi_detect, 2000, NULL);		//创建一个定时器来检测WIFI是否连接
-	lv_timer_ready(timer2);     //使定时器立即开启
-	
-    timer3 = lv_timer_create(time_update, 1000, NULL);      //创建一个定时器来更新时间
-    lv_timer_pause(timer3);     //暂停定时器,连接wifi后开启
-
-    timer4 = lv_timer_create(day_update, 1000, NULL);      //创建一个定时器来更新日期
-    lv_timer_pause(timer4);     //暂停定时器,连接wifi后开启
 }

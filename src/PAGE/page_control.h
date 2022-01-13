@@ -9,7 +9,7 @@ extern "C" {
 
 //屏幕变量
 extern lv_obj_t* scr_setup, * scr_home, * scr_setting, * scr_weather, * scr_infrared, * scr_music, * scr_calendar, * scr_time;
-extern lv_obj_t* symbol_wifi, * home_time;
+extern lv_obj_t* symbol_wifi;
 
 //时间&日期变量
 extern uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
