@@ -22,8 +22,8 @@ static void day_highlight(lv_event_t* a)        //点击事件,高亮点击的�
 
 void page_calendar()
 {
-    calendar = lv_calendar_create(scr_calendar);
-    current_date = lv_label_create(scr_calendar);
+    calendar = lv_calendar_create(scr_page);
+    current_date = lv_label_create(scr_page);
 
     lv_obj_set_pos(current_date, 180, 15);
     

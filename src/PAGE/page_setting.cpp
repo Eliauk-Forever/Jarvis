@@ -45,7 +45,7 @@ void sensor_measure(lv_timer_t * timer4)    //每2s执行一次
     }
 }
 
-static void back_keep_cb(lv_event_t* LV_EVENT_PRESSED)
+static void back_delete_cb(lv_event_t* event)
 {
     lv_timer_del(timer4);
 
@@ -59,7 +59,7 @@ static void back_keep_cb(lv_event_t* LV_EVENT_PRESSED)
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
     }
 
-	lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 50, 100, true);
+	lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
 }
 
 //温湿度传感器开关事件
@@ -112,7 +112,7 @@ static void wifi_event_handler(lv_event_t* b)
 
 void page_setting()
 {
-	lv_obj_t* tabview = lv_tabview_create(scr_setting, LV_DIR_TOP, 50);
+	lv_obj_t* tabview = lv_tabview_create(scr_page, LV_DIR_TOP, 50);
 	
 	lv_obj_t* tab1 = lv_tabview_add_tab(tabview, LV_SYMBOL_LIST);
 	lv_obj_t* tab2 = lv_tabview_add_tab(tabview, LV_SYMBOL_HOME);
@@ -244,5 +244,5 @@ void page_setting()
 	lv_obj_t* label_exit = lv_label_create(btn_exit);
 	lv_obj_center(label_exit);
 	lv_label_set_text(label_exit, "exit");
-	lv_obj_add_event_cb(btn_exit, back_keep_cb, LV_EVENT_PRESSED, NULL);
+	lv_obj_add_event_cb(btn_exit, back_delete_cb, LV_EVENT_PRESSED, NULL);
 }

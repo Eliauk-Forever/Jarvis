@@ -15,9 +15,9 @@ static void event_handler(lv_event_t* b)
 void page_infrared()
 {
     lv_obj_t* switch_1, * label_1, *label_2;
-    switch_1 = lv_switch_create(scr_infrared);
-    label_1 = lv_label_create(scr_infrared);
-    label_2 = lv_label_create(scr_infrared);
+    switch_1 = lv_switch_create(scr_page);
+    label_1 = lv_label_create(scr_page);
+    label_2 = lv_label_create(scr_page);
 
     lv_obj_set_style_text_font(label_1, &myfont, 0);
     lv_obj_set_style_text_font(label_2, &myfont, 0);

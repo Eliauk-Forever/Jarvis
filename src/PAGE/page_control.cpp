@@ -6,50 +6,56 @@
 #include "page_time.h"
 #include "page_setting.h"
 
-LV_FONT_DECLARE(myfont);
-LV_IMG_DECLARE(ironman);
-LV_IMG_DECLARE(desktop);
+LV_FONT_DECLARE(myfont)
+LV_IMG_DECLARE(desktop)
+LV_IMG_DECLARE(hongwai)
+LV_IMG_DECLARE(tianqi)
+LV_IMG_DECLARE(rili)
+LV_IMG_DECLARE(shizhong)
+LV_IMG_DECLARE(yinyue)
+LV_IMG_DECLARE(shezhi)
 
-lv_obj_t* scr_setup, * scr_home, * scr_setting, * scr_weather, * scr_infrared, * scr_music, * scr_calendar, * scr_time;
-lv_obj_t* bg_setup, * bg_desktop;
-lv_obj_t* symbol_wifi, * btn_back, * home_time;
+lv_obj_t* scr_setup, * scr_home, * scr_page;
+lv_obj_t* symbol_wifi, * home_time, * btn_back;
 
 lv_timer_t* timer1, * timer2, * timer3;
 
 uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
+uint8_t page_num;
 
 ESP32Time rtc;
 WiFiUDP ntpUDP;
 
 NTPClient timeClient(ntpUDP,"pool.ntp.org");  //NTP服务器地址
 
-static void back_delete_cb(lv_event_t* LV_EVENT_LONG_PRESSED)
+static void back_delete_cb(lv_event_t* event)
 {
-    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 10, 10, true);        //退出后删除页面
+    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);   //退出后删除页面
 }
 
-static void btn1_event_cb(lv_event_t * LV_EVENT_RELEASED)       //红外
+static void btn1_event_cb(lv_event_t * event)       //红外
 {
-    scr_infrared = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_infrared, LV_SCR_LOAD_ANIM_FADE_ON, 50, 10, false);
-    lv_obj_add_event_cb(scr_infrared, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_infrared();
 }
 
-static void btn2_event_cb(lv_event_t * LV_EVENT_RELEASED)       //天气
+static void btn2_event_cb(lv_event_t * event)       //天气
 {
-    scr_weather = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_weather, LV_SCR_LOAD_ANIM_FADE_ON, 50, 10, false);
-    lv_obj_add_event_cb(scr_weather, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_weather();
 }
 
-static void btn3_event_cb(lv_event_t * LV_EVENT_RELEASED)       //日历
+static void btn3_event_cb(lv_event_t * event)       //日历
 {
-    scr_calendar = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_calendar, LV_SCR_LOAD_ANIM_FADE_ON, 10, 100, false);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
 
-    btn_back = lv_btn_create(scr_calendar);
+    btn_back = lv_btn_create(scr_page);
     lv_obj_set_size(btn_back, 150, 30);
     lv_obj_align(btn_back, LV_ALIGN_TOP_LEFT, 10, 10);
 
@@ -59,28 +65,28 @@ static void btn3_event_cb(lv_event_t * LV_EVENT_RELEASED)       //日历
     lv_obj_center(lunar);
 
     lv_obj_add_event_cb(btn_back, back_delete_cb, LV_EVENT_PRESSED, NULL);
-    lv_obj_add_event_cb(scr_calendar, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_calendar();
 }
 
-static void btn4_event_cb(lv_event_t * LV_EVENT_RELEASED)       //时钟
+static void btn4_event_cb(lv_event_t * event)       //时钟
 {
-    scr_time = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_time, LV_SCR_LOAD_ANIM_FADE_ON, 50, 10, false);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
     page_time();
 }
 
-static void btn5_event_cb(lv_event_t * LV_EVENT_RELEASED)       //音乐
+static void btn5_event_cb(lv_event_t * event)       //音乐
 {
-    scr_music = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_music, LV_SCR_LOAD_ANIM_FADE_ON, 50, 10, false);
-    lv_obj_add_event_cb(scr_music, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
 }
 
-static void btn6_event_cb(lv_event_t * LV_EVENT_RELEASED)       //设置
+static void btn6_event_cb(lv_event_t * event)       //设置
 {
-    scr_setting = lv_obj_create(NULL); 
-    lv_scr_load_anim(scr_setting, LV_SCR_LOAD_ANIM_FADE_ON, 50, 10, false);
+
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
     page_setting(); 
 }
 
@@ -137,102 +143,113 @@ void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
 
 void page_init()
 {
-    //背景主题初始化
-    scr_setup = lv_obj_create(NULL);
-    lv_scr_load(scr_setup);
-
-    bg_setup = lv_img_create(scr_setup);
-    lv_img_set_src(bg_setup, &ironman);
-
-    lv_obj_t* spinner_start = lv_spinner_create(bg_setup, 3000, 15);
-    lv_obj_set_size(spinner_start, 45, 45);
-    lv_obj_align(spinner_start, LV_ALIGN_BOTTOM_RIGHT, -15, -15);
+    
 }
 
 void page_home()
 {
     scr_home = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_FADE_ON, 300, 2000, true);
+    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 50, 0, true);
+    lv_obj_remove_style_all(scr_home);
 
-    bg_desktop = lv_img_create(scr_home);
+    lv_obj_t* bg_desktop = lv_img_create(scr_home);
     lv_img_set_src(bg_desktop, &desktop);
+    lv_obj_add_flag(bg_desktop, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(bg_desktop, LV_DIR_TOP|LV_DIR_BOTTOM);
 
     lv_obj_t* symbol1 = lv_label_create(bg_desktop);
     lv_obj_t* symbol2 = lv_label_create(bg_desktop);
     symbol_wifi = lv_label_create(bg_desktop);
     home_time = lv_label_create(bg_desktop);
 
+    lv_obj_set_style_text_color(symbol1, lv_color_white(), 0);
+    lv_obj_set_style_text_color(symbol2, lv_color_white(), 0);
+    lv_obj_set_style_text_color(symbol_wifi, lv_color_white(), 0);
+    lv_obj_set_style_text_color(home_time, lv_color_white(), 0);
+
     lv_label_set_text(symbol1, LV_SYMBOL_HOME);
     lv_label_set_text(home_time, "--:--:--");
     lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
     lv_label_set_text(symbol2, LV_SYMBOL_BATTERY_2);
 
-    lv_obj_set_pos(symbol1, 10, 10);
-    lv_obj_set_pos(home_time, 80, 10);
-    lv_obj_set_pos(symbol_wifi, 230, 10);
-    lv_obj_set_pos(symbol2, 275, 10);
-    
-    lv_obj_t* btn1 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn1, 60, 60);
-    lv_obj_align(btn1, LV_ALIGN_CENTER, -100, -30);
+    lv_obj_align(symbol1, LV_ALIGN_TOP_LEFT, 10, 10);
+    lv_obj_align(home_time, LV_ALIGN_TOP_LEFT, 80, 10);
+    lv_obj_align(symbol_wifi, LV_ALIGN_TOP_LEFT, 230, 10);
+    lv_obj_align(symbol2, LV_ALIGN_TOP_LEFT, 275, 10);
 
-    lv_obj_t* label_btn1 = lv_label_create(btn1);
+    lv_obj_t* btn1 = lv_imgbtn_create(scr_home);
+    lv_obj_set_size(btn1, 75, 75);
+    lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 24, 45);
+    lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &hongwai, NULL);
+
+    lv_obj_t* label_btn1 = lv_label_create(scr_home);
+    lv_obj_set_style_text_color(label_btn1, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn1, &myfont, 0);
     lv_label_set_text(label_btn1, "红外");
-    lv_obj_center(label_btn1);
+    lv_obj_align_to(label_btn1, btn1, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn2 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn2, 60, 60);
-    lv_obj_align(btn2, LV_ALIGN_CENTER, 0, -30);
+    lv_obj_t* btn2 = lv_imgbtn_create(scr_home);
+    lv_obj_set_size(btn2, 75, 75);
+    lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
+    lv_imgbtn_set_src(btn2, LV_IMGBTN_STATE_RELEASED, NULL, &tianqi, NULL);
 
-    lv_obj_t* label_btn2 = lv_label_create(btn2);
+    lv_obj_t* label_btn2 = lv_label_create(scr_home);
+    lv_obj_set_style_text_color(label_btn2, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn2, &myfont, 0);
     lv_label_set_text(label_btn2, "天气");
-    lv_obj_center(label_btn2);
+    lv_obj_align_to(label_btn2, btn2, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn3 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn3, 60, 60);
-    lv_obj_align(btn3, LV_ALIGN_CENTER, 100, -30);
+    lv_obj_t* btn3 = lv_imgbtn_create(scr_home);
+    lv_obj_set_size(btn3, 75, 75);
+    lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
+    lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, NULL, &rili, NULL);
 
-    lv_obj_t* label_btn3 = lv_label_create(btn3);
+    lv_obj_t* label_btn3 = lv_label_create(scr_home);
+    lv_obj_set_style_text_color(label_btn3, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn3, &myfont, 0);
     lv_label_set_text(label_btn3, "日历");
-    lv_obj_center(label_btn3);
+    lv_obj_align_to(label_btn3, btn3, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn4 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn4, 60, 60);
-    lv_obj_align(btn4, LV_ALIGN_CENTER, -100, 65);
+    lv_obj_t* btn4 = lv_imgbtn_create(bg_desktop);
+    lv_obj_set_size(btn4, 75, 75);
+    lv_obj_align_to(btn4, label_btn1, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+    lv_imgbtn_set_src(btn4, LV_IMGBTN_STATE_RELEASED, NULL, &shizhong, NULL);
 
-    lv_obj_t* label_btn4 = lv_label_create(btn4);
+    lv_obj_t* label_btn4 = lv_label_create(bg_desktop);
+    lv_obj_set_style_text_color(label_btn4, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
     lv_label_set_text(label_btn4, "时钟");
-    lv_obj_center(label_btn4);
+    lv_obj_align_to(label_btn4, btn4, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn5 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn5, 60, 60);
-    lv_obj_align(btn5, LV_ALIGN_CENTER, 0, 65);
+    lv_obj_t* btn5 = lv_imgbtn_create(bg_desktop);
+    lv_obj_set_size(btn5, 75, 75);
+    lv_obj_align_to(btn5, label_btn2, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+    lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &yinyue, NULL);
 
-    lv_obj_t* label_btn5 = lv_label_create(btn5);
+    lv_obj_t* label_btn5 = lv_label_create(bg_desktop);
+    lv_obj_set_style_text_color(label_btn5, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn5, &myfont, 0);
     lv_label_set_text(label_btn5, "音乐");
-    lv_obj_center(label_btn5);
+    lv_obj_align_to(label_btn5, btn5, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn6 = lv_btn_create(bg_desktop);
-    lv_obj_set_size(btn6, 60, 60);
-    lv_obj_align(btn6, LV_ALIGN_CENTER, 100, 65);
+    lv_obj_t* btn6 = lv_imgbtn_create(bg_desktop);
+    lv_obj_set_size(btn6, 75, 75);
+    lv_obj_align_to(btn6, label_btn3, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+    lv_imgbtn_set_src(btn6, LV_IMGBTN_STATE_RELEASED, NULL, &shezhi, NULL);
 
-    lv_obj_t* label_btn6 = lv_label_create(btn6);
+    lv_obj_t* label_btn6 = lv_label_create(bg_desktop);
+    lv_obj_set_style_text_color(label_btn6, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn6, &myfont, 0);
     lv_label_set_text(label_btn6, "设置");
-    lv_obj_center(label_btn6);
+    lv_obj_align_to(label_btn6, btn6, LV_ALIGN_BOTTOM_MID, 0, 20);
     
     //创建按钮点击事件,跳转页面
-    lv_obj_add_event_cb(btn1, btn1_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn2, btn2_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn3, btn3_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn4, btn4_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn5, btn5_event_cb, LV_EVENT_RELEASED, NULL);
-    lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_RELEASED, NULL);
+    lv_obj_add_event_cb(btn1, btn1_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn2, btn2_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn3, btn3_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn4, btn4_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn5, btn5_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
+    lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
 
     timer1 = lv_timer_create(wifi_detect, 2000, NULL);		//创建一个定时器来检测WIFI是否连接
 	
@@ -245,7 +262,7 @@ void page_home()
 
 void Gui_Init(void)
 {
-    page_init();
+    //page_init();
     page_home();
     HAL::Wifi_Connect();
 }
