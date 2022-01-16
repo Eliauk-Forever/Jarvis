@@ -1,5 +1,5 @@
 // ArduinoJson - https://arduinojson.org
-// Copyright Benoit Blanchon 2014-2021
+// Copyright © 2014-2022, Benoit BLANCHON
 // MIT License
 
 #include <ArduinoJson.h>
@@ -1025,6 +1025,20 @@ TEST_CASE("deserializeMsgPack() filter") {
       CHECK(error == DeserializationError::TooDeep);
     }
   }
+}
+
+TEST_CASE("Zero-copy mode") {  // issue #1697
+  char input[] = "\x82\xA7include\x01\xA6ignore\x02";
+
+  StaticJsonDocument<256> filter;
+  filter["include"] = true;
+
+  StaticJsonDocument<256> doc;
+  DeserializationError err =
+      deserializeMsgPack(doc, input, 18, DeserializationOption::Filter(filter));
+
+  CHECK(err == DeserializationError::Ok);
+  CHECK(doc.as<std::string>() == "{\"include\":1}");
 }
 
 TEST_CASE("Overloads") {

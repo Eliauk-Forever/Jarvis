@@ -26,7 +26,7 @@ uint8_t page_num;
 ESP32Time rtc;
 WiFiUDP ntpUDP;
 
-NTPClient timeClient(ntpUDP,"pool.ntp.org");  //NTP服务器地址
+NTPClient timeClient(ntpUDP, "ntp.aliyun.com");  //NTP服务器地址
 
 static void back_delete_cb(lv_event_t* event)
 {
@@ -112,7 +112,7 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
 
         lv_timer_resume(timer2);
-        lv_timer_resume(timer3);
+        lv_timer_ready(timer3);
 
         lv_timer_pause(timer1);
 	}
@@ -138,7 +138,8 @@ void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
 	Serial.print(currentMonth);
 	Serial.print("/");
 	Serial.println(monthDay);
-    lv_timer_set_period(timer3, 3600000);
+    lv_timer_pause(timer3);
+    //lv_timer_set_period(timer3, 3600000);
 }
 
 void page_init()

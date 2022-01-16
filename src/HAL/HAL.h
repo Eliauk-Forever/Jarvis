@@ -7,6 +7,7 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
 #include <ESP32Time.h>
 
 #include <WebServer.h>

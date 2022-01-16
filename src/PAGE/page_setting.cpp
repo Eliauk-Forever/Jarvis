@@ -92,11 +92,11 @@ static void wifi_event_handler(lv_event_t* b)
 		if (lv_obj_has_state(obj, LV_STATE_CHECKED))
 		{
             if(HAL::AutoConfig())
-            {
+            {	
                 Wifi_status = 2;
                 lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
-		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());      
+		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
             }
 		}
 		else
