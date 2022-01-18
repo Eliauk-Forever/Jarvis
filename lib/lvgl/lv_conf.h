@@ -35,7 +35,7 @@
 #define LV_COLOR_SCREEN_TRANSP 0
 
 /*Images pixels with this color will not be drawn if they are chroma keyed)*/
-#define LV_COLOR_CHROMA_KEY lv_color_hex(0xc0c0c0)         /*pure grey*/
+#define LV_COLOR_CHROMA_KEY lv_color_hex(0x000719)         /*pure grey*/
 
 /*=========================
    MEMORY SETTINGS

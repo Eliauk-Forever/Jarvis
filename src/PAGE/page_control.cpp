@@ -182,6 +182,7 @@ void page_home()
     lv_obj_set_size(btn1, 75, 75);
     lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 24, 45);
     lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &hongwai, NULL);
+    // lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, "S:/image/hongwai.bin", NULL);
 
     lv_obj_t* label_btn1 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn1, lv_color_white(), 0);

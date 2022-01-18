@@ -25,6 +25,14 @@ namespace HAL
     void Wifi_Connect();
     void Wifi_Close();
 
+/* Backlight */
+    void Backlight_Init();
+    uint32_t Backlight_GetValue();
+    void Backlight_SetValue(int32_t val);
+    void Backlight_SetGradual(uint32_t target, uint16_t time = 500);
+    void Backlight_ForceLit(bool en);
+    void setBackLight(float duty);
+    
 /* SD */
     bool SD_Init();
     float SD_GetCardSizeMB();

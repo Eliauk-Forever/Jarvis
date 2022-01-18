@@ -4,9 +4,11 @@
 |----------|-------------|
 | Hardware | V3.2        |
 | Software | V2.1        |
-| System   | LVGL　V８.１.０ |
-| MCU      | ＥＳＰ３２       |
+| System   | LVGL V8.1.0 |
+| MCU      | ESP32       |
+
+#define LV_COLOR_CHROMA_KEY lv_color_hex(0x000719)
 
 #Last update
 
-2022-01-12 11:12:41
+2022-01-18 17:59:59

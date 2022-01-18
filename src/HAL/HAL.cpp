@@ -24,8 +24,6 @@ void HAL::Init()
 	Serial.println("\n");
 
 	HAL::SD_Init();	
-
-	// setCpuFrequencyMhz(240);
 }
 
 void HAL::Wifi_Connect()
