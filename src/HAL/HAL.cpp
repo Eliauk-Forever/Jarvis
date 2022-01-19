@@ -23,7 +23,7 @@ void HAL::Init()
     Serial.print("Author: " VERSION_AUTHOR_NAME);
 	Serial.println("\n");
 
-	HAL::SD_Init();	
+	HAL::SD_Init();
 }
 
 void HAL::Wifi_Connect()

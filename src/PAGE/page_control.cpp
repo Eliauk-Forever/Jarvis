@@ -15,13 +15,12 @@ LV_IMG_DECLARE(shizhong)
 LV_IMG_DECLARE(yinyue)
 LV_IMG_DECLARE(shezhi)
 
-lv_obj_t* scr_setup, * scr_home, * scr_page;
+lv_obj_t* scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * home_time, * btn_back;
 
 lv_timer_t* timer1, * timer2, * timer3;
 
 uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
-uint8_t page_num;
 
 ESP32Time rtc;
 WiFiUDP ntpUDP;
@@ -84,7 +83,6 @@ static void btn5_event_cb(lv_event_t * event)       //音乐
 
 static void btn6_event_cb(lv_event_t * event)       //设置
 {
-
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
     page_setting(); 
@@ -142,21 +140,13 @@ void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
     //lv_timer_set_period(timer3, 3600000);
 }
 
-void page_init()
-{
-    
-}
-
 void page_home()
 {
     scr_home = lv_obj_create(NULL);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 50, 0, true);
-    lv_obj_remove_style_all(scr_home);
 
     lv_obj_t* bg_desktop = lv_img_create(scr_home);
     lv_img_set_src(bg_desktop, &desktop);
-    lv_obj_add_flag(bg_desktop, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_scroll_dir(bg_desktop, LV_DIR_TOP|LV_DIR_BOTTOM);
 
     lv_obj_t* symbol1 = lv_label_create(bg_desktop);
     lv_obj_t* symbol2 = lv_label_create(bg_desktop);
@@ -212,34 +202,34 @@ void page_home()
     lv_label_set_text(label_btn3, "日历");
     lv_obj_align_to(label_btn3, btn3, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn4 = lv_imgbtn_create(bg_desktop);
+    lv_obj_t* btn4 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn4, 75, 75);
     lv_obj_align_to(btn4, label_btn1, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn4, LV_IMGBTN_STATE_RELEASED, NULL, &shizhong, NULL);
 
-    lv_obj_t* label_btn4 = lv_label_create(bg_desktop);
+    lv_obj_t* label_btn4 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn4, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
     lv_label_set_text(label_btn4, "时钟");
     lv_obj_align_to(label_btn4, btn4, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn5 = lv_imgbtn_create(bg_desktop);
+    lv_obj_t* btn5 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn5, 75, 75);
     lv_obj_align_to(btn5, label_btn2, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &yinyue, NULL);
 
-    lv_obj_t* label_btn5 = lv_label_create(bg_desktop);
+    lv_obj_t* label_btn5 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn5, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn5, &myfont, 0);
     lv_label_set_text(label_btn5, "音乐");
     lv_obj_align_to(label_btn5, btn5, LV_ALIGN_BOTTOM_MID, 0, 20);
 
-    lv_obj_t* btn6 = lv_imgbtn_create(bg_desktop);
+    lv_obj_t* btn6 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn6, 75, 75);
     lv_obj_align_to(btn6, label_btn3, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn6, LV_IMGBTN_STATE_RELEASED, NULL, &shezhi, NULL);
 
-    lv_obj_t* label_btn6 = lv_label_create(bg_desktop);
+    lv_obj_t* label_btn6 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn6, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn6, &myfont, 0);
     lv_label_set_text(label_btn6, "设置");

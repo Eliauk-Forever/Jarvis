@@ -464,13 +464,13 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 
 #define LV_USE_CHART      1
 
-#define LV_USE_COLORWHEEL 1
+#define LV_USE_COLORWHEEL 0
 
 #define LV_USE_IMGBTN     1
 
-#define LV_USE_KEYBOARD   1
+#define LV_USE_KEYBOARD   0
 
-#define LV_USE_LED        1
+#define LV_USE_LED        0
 
 #define LV_USE_LIST       1
 
@@ -576,35 +576,35 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
  *----------*/
 
 /*1: Enable API to take snapshot for object*/
-#define LV_USE_SNAPSHOT 1
+#define LV_USE_SNAPSHOT 0
 
 /*===================
  * DEMO USAGE
  ====================*/
 
 /*Show some widget*/
-#define LV_USE_DEMO_WIDGETS        1
+#define LV_USE_DEMO_WIDGETS        0
 #if LV_USE_DEMO_WIDGETS
-#define LV_DEMO_WIDGETS_SLIDESHOW  1
+#define LV_DEMO_WIDGETS_SLIDESHOW  0
 #endif
 
 /*Demonstrate the usage of encoder and keyboard*/
-#define LV_USE_DEMO_KEYPAD_AND_ENCODER     1
+#define LV_USE_DEMO_KEYPAD_AND_ENCODER     0
 
 /*Benchmark your system*/
-#define LV_USE_DEMO_BENCHMARK   1
+#define LV_USE_DEMO_BENCHMARK   0
 
 /*Stress test for LVGL*/
-#define LV_USE_DEMO_STRESS      1
+#define LV_USE_DEMO_STRESS      0
 
 /*Music player demo*/
-#define LV_USE_DEMO_MUSIC       1
+#define LV_USE_DEMO_MUSIC       0
 #if LV_USE_DEMO_MUSIC
-# define LV_DEMO_MUSIC_SQUARE       1
-# define LV_DEMO_MUSIC_LANDSCAPE    1
-# define LV_DEMO_MUSIC_ROUND        1
-# define LV_DEMO_MUSIC_LARGE        1
-# define LV_DEMO_MUSIC_AUTO_PLAY    1
+# define LV_DEMO_MUSIC_SQUARE       0
+# define LV_DEMO_MUSIC_LANDSCAPE    0
+# define LV_DEMO_MUSIC_ROUND        0
+# define LV_DEMO_MUSIC_LARGE        0
+# define LV_DEMO_MUSIC_AUTO_PLAY    0
 #endif
 
 /*==================
@@ -612,7 +612,7 @@ e.g. "stm32f769xx.h" or "stm32f429xx.h"*/
 *==================*/
 
 /*Enable the examples to be built with the library*/
-#define LV_BUILD_EXAMPLES 1
+#define LV_BUILD_EXAMPLES 0
 
 /*--END OF LV_CONF_H--*/
 

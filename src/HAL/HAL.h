@@ -16,6 +16,10 @@
 #include <HTTPClient.h>
 #include "Version.h"
 
+#include <IRsend.h>
+#include <IRremoteESP8266.h>
+#include <ir_Coolix.h>
+
 extern uint8_t Wifi_status;
 
 namespace HAL

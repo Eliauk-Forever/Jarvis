@@ -8,7 +8,7 @@ extern "C" {
 #include "lvgl.h"
 
 //屏幕变量
-extern lv_obj_t* scr_setup, * scr_home, * scr_page;
+extern lv_obj_t* scr_home, * scr_page;
 extern lv_obj_t* symbol_wifi;
 
 //时间&日期变量
