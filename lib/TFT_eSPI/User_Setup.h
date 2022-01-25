@@ -175,26 +175,24 @@
 // The hardware SPI can be mapped to any pins
 
 //V3
-#define TFT_MISO 19
-#define TFT_MOSI 4
-#define TFT_SCLK 18
-#define TFT_CS   14  // Chip select control pin
-#define TFT_DC   15  // Data Command control pin
-#define TFT_RST  5  // Reset pin (could connect to RST pin)
-//#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
-//#define TFT_BL   2  // LED back-light (only for ST7789 with backlight control pin)
-#define TOUCH_CS 27     // Chip select pin (T_CS) of touch screen
-
-//V4
 // #define TFT_MISO 19
-// #define TFT_MOSI 23
+// #define TFT_MOSI 4
 // #define TFT_SCLK 18
-// #define TFT_CS   5  // Chip select control pin
-// #define TFT_DC   35  // Data Command control pin
-// #define TFT_RST  4  // Reset pin (could connect to RST pin)
+// #define TFT_CS   14  // Chip select control pin
+// #define TFT_DC   15  // Data Command control pin
+// #define TFT_RST  5  // Reset pin (could connect to RST pin)
 // //#define TFT_RST  -1  // Set TFT_RST to -1 if display RESET is connected to ESP32 board RST
-// //#define TFT_BL   32  // LED back-light (only for ST7789 with backlight control pin)
-// #define TOUCH_CS 17     // Chip select pin (T_CS) of touch screen
+// //#define TFT_BL   2  // LED back-light (only for ST7789 with backlight control pin)
+// #define TOUCH_CS 27     // Chip select pin (T_CS) of touch screen
+ 
+//V4
+#define TFT_MISO 19
+#define TFT_MOSI 23
+#define TFT_SCLK 18
+#define TFT_CS   5  // Chip select control pin
+#define TFT_DC   2  // Data Command control pin
+#define TFT_RST  4  // Reset pin (could connect to RST pin)
+#define TOUCH_CS 17     // Chip select pin (T_CS) of touch screen
 
 //#define TFT_WR 22    // Write strobe for modified Raspberry Pi TFT only
 
@@ -279,8 +277,8 @@
 // #define SPI_FREQUENCY  10000000
 // #define SPI_FREQUENCY  20000000
 //#define SPI_FREQUENCY  27000000 // Actually sets it to 26.67MHz = 80/3
-#define SPI_FREQUENCY  40000000
-//#define SPI_FREQUENCY  60000000
+//#define SPI_FREQUENCY  40000000
+#define SPI_FREQUENCY  60000000
 //  #define SPI_FREQUENCY  80000000
 
 // Optional reduced SPI frequency for reading TFT
@@ -292,7 +290,7 @@
 // The ESP32 has 2 free SPI ports i.e. VSPI and HSPI, the VSPI is the default.
 // If the VSPI port is in use and pins are not accessible (e.g. TTGO T-Beam)
 // then uncomment the following line:
-// #define USE_HSPI_PORT
+//#define USE_HSPI_PORT
 
 // Comment out the following #define if "SPI Transactions" do not need to be
 // supported. When commented out the code size will be smaller and sketches will

@@ -5,7 +5,7 @@
 bool HAL::SD_Init()
 {
     SPIClass* sd_spi = new SPIClass(HSPI); // another SPI
-    if (!SD.begin(13, *sd_spi, 80000000)) // SD-Card SS pin is 15
+    if (!SD.begin(15, *sd_spi, 80000000)) // SD-Card SS pin is 15
     {
         Serial.println("Card Mount Failed");
         return false;
