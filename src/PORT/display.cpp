@@ -50,8 +50,8 @@ void touchpad_read( lv_indev_drv_t * indev_driver, lv_indev_data_t * data )
 
 void Screen_Init()
 {
-    //HAL::Backlight_Init();
-    //HAL::Backlight_SetValue(0);
+    HAL::Backlight_Init();
+    HAL::Backlight_SetValue(0);
 
     lv_init();
     
@@ -80,5 +80,5 @@ void Screen_Init()
     lv_indev_drv_register( &indev_drv );
     tft.writecommand(ST7789_DISPON); //Display on
 
-    //HAL::Backlight_SetValue(500);
+    HAL::Backlight_SetValue(500);
 }
