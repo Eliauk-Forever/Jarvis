@@ -40,8 +40,8 @@
 
 *********************************************
 
-#define LV_COLOR_CHROMA_KEY lv_color_hex(0x111111)
+LV_COLOR_CHROMA_KEY   lv_color_hex   (0x111111)
 
 
 #Last update
-2022-03-08 22:25:24
+2022-03-08 22:26:58
