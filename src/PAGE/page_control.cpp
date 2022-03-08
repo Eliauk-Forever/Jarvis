@@ -8,15 +8,15 @@
 
 LV_FONT_DECLARE(myfont)
 LV_IMG_DECLARE(desktop)
-LV_IMG_DECLARE(hongwai)
+LV_IMG_DECLARE(kongzhi)
 LV_IMG_DECLARE(tianqi)
 LV_IMG_DECLARE(rili)
 LV_IMG_DECLARE(shizhong)
-LV_IMG_DECLARE(yinyue)
+LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
 lv_obj_t* scr_home, * scr_page;
-lv_obj_t* symbol_wifi, * home_time, * btn_back;
+lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
 
 lv_timer_t* timer1, * timer2, * timer3;
 
@@ -32,7 +32,7 @@ static void back_delete_cb(lv_event_t* event)
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);   //退出后删除页面
 }
 
-static void btn1_event_cb(lv_event_t * event)       //红外
+static void btn1_event_cb(lv_event_t * event)       //控制
 {
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
@@ -74,7 +74,7 @@ static void btn4_event_cb(lv_event_t * event)       //时钟
     page_time();
 }
 
-static void btn5_event_cb(lv_event_t * event)       //音乐
+static void btn5_event_cb(lv_event_t * event)       //感知
 {
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
@@ -111,7 +111,6 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
 
         lv_timer_resume(timer2);
         lv_timer_ready(timer3);
-
         lv_timer_pause(timer1);
 	}
 }
@@ -144,7 +143,7 @@ void page_home()
 {
     scr_home = lv_obj_create(NULL);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 50, 0, true);
-
+    
     lv_obj_t* bg_desktop = lv_img_create(scr_home);
     lv_img_set_src(bg_desktop, &desktop);
 
@@ -152,32 +151,36 @@ void page_home()
     lv_obj_t* symbol2 = lv_label_create(bg_desktop);
     symbol_wifi = lv_label_create(bg_desktop);
     home_time = lv_label_create(bg_desktop);
+    symbol_sd = lv_label_create(bg_desktop);
 
     lv_obj_set_style_text_color(symbol1, lv_color_white(), 0);
     lv_obj_set_style_text_color(symbol2, lv_color_white(), 0);
     lv_obj_set_style_text_color(symbol_wifi, lv_color_white(), 0);
     lv_obj_set_style_text_color(home_time, lv_color_white(), 0);
+    lv_obj_set_style_text_color(symbol_sd, lv_color_white(), 0);
 
     lv_label_set_text(symbol1, LV_SYMBOL_HOME);
     lv_label_set_text(home_time, "--:--:--");
     lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
+    lv_label_set_text(symbol_sd, LV_SYMBOL_SD_CARD);
     lv_label_set_text(symbol2, LV_SYMBOL_BATTERY_2);
 
     lv_obj_align(symbol1, LV_ALIGN_TOP_LEFT, 10, 10);
     lv_obj_align(home_time, LV_ALIGN_TOP_LEFT, 80, 10);
+    lv_obj_align(symbol_sd, LV_ALIGN_TOP_LEFT, 195, 10);
     lv_obj_align(symbol_wifi, LV_ALIGN_TOP_LEFT, 230, 10);
     lv_obj_align(symbol2, LV_ALIGN_TOP_LEFT, 275, 10);
 
     lv_obj_t* btn1 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn1, 75, 75);
     lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 24, 45);
-    lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &hongwai, NULL);
+    lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &kongzhi, NULL);
     // lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, "S:/image/hongwai.bin", NULL);
 
     lv_obj_t* label_btn1 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn1, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn1, &myfont, 0);
-    lv_label_set_text(label_btn1, "红外");
+    lv_label_set_text(label_btn1, "控制");
     lv_obj_align_to(label_btn1, btn1, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn2 = lv_imgbtn_create(scr_home);
@@ -216,12 +219,12 @@ void page_home()
     lv_obj_t* btn5 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn5, 75, 75);
     lv_obj_align_to(btn5, label_btn2, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
-    lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &yinyue, NULL);
+    lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &ganzhi, NULL);
 
     lv_obj_t* label_btn5 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn5, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn5, &myfont, 0);
-    lv_label_set_text(label_btn5, "音乐");
+    lv_label_set_text(label_btn5, "感知");
     lv_obj_align_to(label_btn5, btn5, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn6 = lv_imgbtn_create(scr_home);

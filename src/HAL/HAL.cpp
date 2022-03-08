@@ -24,6 +24,7 @@ void HAL::Init()
 	Serial.println("\n");
 
 	HAL::SD_Init();
+
 }
 
 void HAL::Wifi_Connect()

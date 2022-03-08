@@ -18,7 +18,7 @@
 
 #include <IRsend.h>
 #include <IRremoteESP8266.h>
-#include <ir_Coolix.h>
+#include <ir_Gree.h>
 
 extern uint8_t Wifi_status;
 
@@ -31,11 +31,7 @@ namespace HAL
 
 /* Backlight */
     void Backlight_Init();
-    uint32_t Backlight_GetValue();
-    void Backlight_SetValue(int32_t val);
-    void Backlight_SetGradual(uint32_t target, uint16_t time = 500);
-    void Backlight_ForceLit(bool en);
-    void setBackLight(float duty);
+    void SetBackLight(int32_t val);
     
 /* SD */
     bool SD_Init();
