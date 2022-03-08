@@ -40,7 +40,7 @@
 
 *********************************************
 
-LV_COLOR_CHROMA_KEY:
+LV_COLOR_CHROMA_KEY :
 0x111111
 
 #Last update
