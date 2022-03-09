@@ -16,8 +16,10 @@
 #include <HTTPClient.h>
 #include "Version.h"
 
-#include <IRsend.h>
 #include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <IRrecv.h>
+#include <IRutils.h>
 #include <ir_Gree.h>
 
 extern uint8_t Wifi_status;

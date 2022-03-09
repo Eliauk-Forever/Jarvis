@@ -2,18 +2,24 @@
 #include "page_control.h"
 #include "page_infrared.h"
 
-LV_FONT_DECLARE(myfont)
-
-lv_obj_t* box, * wendu, *mode, *speed, * staus;
-
-int Power_staus = 0;    //0为OFF,1为ON;
-int Now_Temp = 24;
-int Now_Mode = 1;
-int Now_Speed = 1;
-
 //红外发射管引脚定义
 const uint16_t kIrLed = 25;
 IRGreeAC ac(kIrLed);
+
+//红外接收管引脚定义
+IRrecv irrecv(16);
+decode_results results;     //声明一个独有的变量类型保存接收到的信息
+
+LV_FONT_DECLARE(myfont)
+
+lv_obj_t* box, * wendu, *mode, *speed, * staus, * page_study, *text_1, *text_2;
+lv_timer_t* timer_rev;
+
+int Power_staus = 0;    //0为OFF,1为ON;
+int Now_Temp = 24;      //默认设置温度为24度
+int Now_Mode = 1;       //默认设置模式为制冷
+int Now_Speed = 1;      //默认设置风速为自动风速
+int num = 0;
 
 static void power(lv_event_t* t)       //开关机
 {
@@ -121,15 +127,115 @@ static void change_speed(lv_event_t* t)       //风速
     }
 }
 
-static void mode_study(lv_event_t* t)       //学习模式
+void sign_rev(lv_timer_t * timer_rev)       //通过红外接收管获取脉冲信号,每1s执行一次
 {
+    if (irrecv.decode(&results)) 
+    {
+        Serial.println(results.value, HEX);
+        lv_label_set_text_fmt(text_2, "%X", results.value);
+        Serial.println("");
+        irrecv.resume();
+    }
+}
+
+static void save(lv_event_t* t)       //保存当前项,进入下一项
+{
+    num++;
+    if (num > 4)
+    {
+        num = 0;
+    }
+    switch (num)
+    {
+        case 0:
+            lv_label_set_text(text_1, "#EE7700 请按开关键#");
+            lv_label_set_text_fmt(text_2, " ");
+            break;
+
+        case 1:
+            lv_label_set_text(text_1, "#EE7700 请按加键#");
+            lv_label_set_text(text_2, " ");
+            break;
+
+        case 2:
+            lv_label_set_text(text_1, "#EE7700 请按减键#");
+            lv_label_set_text(text_2, " ");
+            break;
+
+        case 3:
+            lv_label_set_text(text_1, "#EE7700 请按模式键#");
+            lv_label_set_text(text_2, " ");
+            break;
+
+        case 4:
+            lv_label_set_text(text_1, "#EE7700 请按风速键#");
+            lv_label_set_text(text_2, " ");
+            break;
+    } 
+}
+
+static void quit(lv_event_t* t)       //退出学习模式,返回控制界面
+{
+    irrecv.disableIRIn();    //关闭红外接收管
+
+    lv_obj_clean(page_study);
+    lv_timer_pause(timer_rev);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
+}
+
+static void mode_study(lv_event_t* t)       //进入学习模式
+{
+    irrecv.enableIRIn();    //开启红外接收管
+
+    page_study = lv_obj_create(NULL);
+    lv_scr_load_anim(page_study, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+
+    lv_obj_t* save_btn = lv_btn_create(page_study);
+    lv_obj_t* save_label = lv_label_create(save_btn);
+    lv_obj_t* quit_btn = lv_btn_create(page_study);
+    lv_obj_t* quit_label = lv_label_create(quit_btn);
+    
+    lv_label_set_text(save_label, "SAVE");
+    lv_obj_center(save_label);
+    lv_label_set_text(quit_label, "EXIT");
+    lv_obj_center(quit_label);
+    
+    lv_obj_set_size(save_btn, 100, 30);
+    lv_obj_align(save_btn, LV_ALIGN_BOTTOM_MID, -70, -20);
+    lv_obj_set_size(quit_btn, 100, 30);
+    lv_obj_align(quit_btn, LV_ALIGN_BOTTOM_MID, 70, -20);
+
+    lv_obj_add_event_cb(save_btn, save, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(quit_btn, quit, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t* new_box = lv_obj_create(page_study);
+    lv_obj_set_size(new_box, 240, 80);
+    lv_obj_center(new_box);
+
+    text_1 = lv_label_create(page_study);
+    text_2 = lv_label_create(new_box);
+    lv_obj_align(text_1, LV_ALIGN_TOP_MID, 0, 30);
+    lv_obj_center(text_2);
+
+    lv_obj_set_style_text_font(text_1, &myfont, 0);
+    lv_label_set_recolor(text_1, true);
+
+    lv_timer_resume(timer_rev);
+
+    lv_label_set_text(text_1, "#EE7700 请按开关键#");
+    lv_label_set_text(text_2, " ");
 
 }
 
 void page_infrared()
 {
-    ac.begin();
+    ac.begin();             //开启红外发射管
+    
+    //创建一个定时器用于接收红外信号
+    timer_rev = lv_timer_create(sign_rev, 1000, NULL);
+    lv_timer_pause(timer_rev);      //暂停定时器
 
+    //创建一个信息显示窗口
     box = lv_obj_create(scr_page);
     lv_obj_set_size(box, 130, 200);
     lv_obj_align(box, LV_ALIGN_LEFT_MID, 5, 0);
@@ -175,20 +281,22 @@ void page_infrared()
     lv_obj_t* btn_speed = lv_btn_create(scr_page);
     lv_obj_t* btn_study = lv_btn_create(scr_page);
 
+    //调整按钮的大小和位置
     lv_obj_set_size(btn_power, 150, 30);
     lv_obj_set_size(btn_add, 60, 60);
     lv_obj_set_size(btn_reduce, 60, 60);
-    lv_obj_set_size(btn_mode, 60, 60);
-    lv_obj_set_size(btn_speed, 60, 60);
+    lv_obj_set_size(btn_mode, 40, 110);
+    lv_obj_set_size(btn_speed, 40, 110);
     lv_obj_set_size(btn_study, 150, 30);
 
     lv_obj_align(btn_power, LV_ALIGN_TOP_MID, 65, 15);
-    lv_obj_align_to(btn_add, btn_power, LV_ALIGN_OUT_BOTTOM_MID, 40, 10);
+    lv_obj_align_to(btn_add, btn_power, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
     lv_obj_align_to(btn_reduce, btn_add, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-    lv_obj_align_to(btn_mode, btn_add, LV_ALIGN_OUT_LEFT_MID, -20, 0);
-    lv_obj_align_to(btn_speed, btn_reduce, LV_ALIGN_OUT_LEFT_MID, -20, 0);
+    lv_obj_align_to(btn_mode, btn_add, LV_ALIGN_CENTER, -60, 35);
+    lv_obj_align_to(btn_speed, btn_add, LV_ALIGN_CENTER, 60, 35);
     lv_obj_align(btn_study, LV_ALIGN_BOTTOM_MID, 65, -15);
 
+    //调整按钮文字的字号和位置
     lv_obj_t* label_power = lv_label_create(btn_power);
     lv_obj_center(label_power);
     lv_obj_t* label_add = lv_label_create(btn_add);
@@ -210,10 +318,11 @@ void page_infrared()
     lv_label_set_text(label_power, "开/关");
     lv_label_set_text(label_add, LV_SYMBOL_PLUS);
     lv_label_set_text(label_reduce, LV_SYMBOL_MINUS);
-    lv_label_set_text(label_mode, "模式");
-    lv_label_set_text(label_speed, "风速");
+    lv_label_set_text(label_mode, "模\n式");
+    lv_label_set_text(label_speed, "风\n速");
     lv_label_set_text(label_study, "学习模式");
 
+    //创建按钮响应事件
     lv_obj_add_event_cb(btn_power, power, LV_EVENT_CLICKED, NULL);
     lv_obj_add_event_cb(btn_add, temp_add, LV_EVENT_CLICKED, NULL);
     lv_obj_add_event_cb(btn_reduce, temp_reduce, LV_EVENT_CLICKED, NULL);
