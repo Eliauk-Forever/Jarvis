@@ -8,7 +8,6 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/never/Documents/PlatformIO/Projects/jarvis/include",
                 "c:/Users/never/Documents/PlatformIO/Projects/jarvis/src",
                 "c:/Users/never/Documents/PlatformIO/Projects/jarvis/lib/TFT_eSPI",
                 "C:/Users/never/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
@@ -114,7 +113,6 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/never/Documents/PlatformIO/Projects/jarvis/include",
                     "c:/Users/never/Documents/PlatformIO/Projects/jarvis/src",
                     "c:/Users/never/Documents/PlatformIO/Projects/jarvis/lib/TFT_eSPI",
                     "C:/Users/never/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",

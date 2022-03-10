@@ -4,6 +4,7 @@
 #include "page_weather.h"
 #include "page_calendar.h"
 #include "page_time.h"
+#include "page_sensor.h"
 #include "page_setting.h"
 
 LV_FONT_DECLARE(myfont)
@@ -17,7 +18,7 @@ LV_IMG_DECLARE(shezhi)
 
 lv_obj_t* scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
-
+lv_style_t img_bg;
 lv_timer_t* timer1, * timer2, * timer3;
 
 uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
@@ -78,7 +79,7 @@ static void btn5_event_cb(lv_event_t * event)       //感知
 {
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
-    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    page_sensor();
 }
 
 static void btn6_event_cb(lv_event_t * event)       //设置
@@ -100,6 +101,7 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
         currentMinute = timeClient.getMinutes();
         currentSecond = timeClient.getSeconds();
         weekDay = timeClient.getDay();
+        
         //将epochTime换算成年月日
         struct tm *ptm = gmtime ((time_t *)&epochTime);
         monthDay = ptm->tm_mday;
@@ -136,7 +138,6 @@ void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
 	Serial.print("/");
 	Serial.println(monthDay);
     lv_timer_pause(timer3);
-    //lv_timer_set_period(timer3, 3600000);
 }
 
 void page_home()
@@ -144,39 +145,40 @@ void page_home()
     scr_home = lv_obj_create(NULL);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 50, 0, true);
     
+    //设置桌面壁纸
     lv_obj_t* bg_desktop = lv_img_create(scr_home);
     lv_img_set_src(bg_desktop, &desktop);
 
+    //创建桌面状态栏
     lv_obj_t* symbol1 = lv_label_create(bg_desktop);
     lv_obj_t* symbol2 = lv_label_create(bg_desktop);
     symbol_wifi = lv_label_create(bg_desktop);
     home_time = lv_label_create(bg_desktop);
     symbol_sd = lv_label_create(bg_desktop);
-
     lv_obj_set_style_text_color(symbol1, lv_color_white(), 0);
     lv_obj_set_style_text_color(symbol2, lv_color_white(), 0);
     lv_obj_set_style_text_color(symbol_wifi, lv_color_white(), 0);
     lv_obj_set_style_text_color(home_time, lv_color_white(), 0);
     lv_obj_set_style_text_color(symbol_sd, lv_color_white(), 0);
-
     lv_label_set_text(symbol1, LV_SYMBOL_HOME);
     lv_label_set_text(home_time, "--:--:--");
     lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
     lv_label_set_text(symbol_sd, LV_SYMBOL_SD_CARD);
     lv_label_set_text(symbol2, LV_SYMBOL_BATTERY_2);
-
     lv_obj_align(symbol1, LV_ALIGN_TOP_LEFT, 10, 10);
     lv_obj_align(home_time, LV_ALIGN_TOP_LEFT, 80, 10);
     lv_obj_align(symbol_sd, LV_ALIGN_TOP_LEFT, 195, 10);
     lv_obj_align(symbol_wifi, LV_ALIGN_TOP_LEFT, 230, 10);
     lv_obj_align(symbol2, LV_ALIGN_TOP_LEFT, 275, 10);
 
+    //创建图标背景风格
+    lv_style_init(&img_bg);
+    lv_style_set_bg_img_opa(&img_bg, LV_OPA_TRANSP);
+
     lv_obj_t* btn1 = lv_imgbtn_create(scr_home);
     lv_obj_set_size(btn1, 75, 75);
     lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 24, 45);
     lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &kongzhi, NULL);
-    // lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, "S:/image/hongwai.bin", NULL);
-
     lv_obj_t* label_btn1 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn1, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn1, &myfont, 0);
@@ -187,7 +189,6 @@ void page_home()
     lv_obj_set_size(btn2, 75, 75);
     lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
     lv_imgbtn_set_src(btn2, LV_IMGBTN_STATE_RELEASED, NULL, &tianqi, NULL);
-
     lv_obj_t* label_btn2 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn2, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn2, &myfont, 0);
@@ -198,7 +199,6 @@ void page_home()
     lv_obj_set_size(btn3, 75, 75);
     lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
     lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, NULL, &rili, NULL);
-
     lv_obj_t* label_btn3 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn3, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn3, &myfont, 0);
@@ -209,7 +209,6 @@ void page_home()
     lv_obj_set_size(btn4, 75, 75);
     lv_obj_align_to(btn4, label_btn1, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn4, LV_IMGBTN_STATE_RELEASED, NULL, &shizhong, NULL);
-
     lv_obj_t* label_btn4 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn4, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
@@ -220,7 +219,6 @@ void page_home()
     lv_obj_set_size(btn5, 75, 75);
     lv_obj_align_to(btn5, label_btn2, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &ganzhi, NULL);
-
     lv_obj_t* label_btn5 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn5, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn5, &myfont, 0);
@@ -231,7 +229,6 @@ void page_home()
     lv_obj_set_size(btn6, 75, 75);
     lv_obj_align_to(btn6, label_btn3, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn6, LV_IMGBTN_STATE_RELEASED, NULL, &shezhi, NULL);
-
     lv_obj_t* label_btn6 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn6, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn6, &myfont, 0);
@@ -247,10 +244,8 @@ void page_home()
     lv_obj_add_event_cb(btn6, btn6_event_cb, LV_EVENT_SHORT_CLICKED, NULL);
 
     timer1 = lv_timer_create(wifi_detect, 2000, NULL);		//创建一个定时器来检测WIFI是否连接
-	
     timer2 = lv_timer_create(time_update, 1000, NULL);      //创建一个定时器来更新时间
     lv_timer_pause(timer2);     //暂停定时器,连接wifi后开启
-
     timer3 = lv_timer_create(day_update, 1000, NULL);      //创建一个定时器来更新日期
     lv_timer_pause(timer3);     //暂停定时器,连接wifi后开启
 }

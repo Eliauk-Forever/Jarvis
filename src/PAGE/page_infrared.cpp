@@ -176,10 +176,9 @@ static void save(lv_event_t* t)       //保存当前项,进入下一项
 
 static void quit(lv_event_t* t)       //退出学习模式,返回控制界面
 {
-    irrecv.disableIRIn();    //关闭红外接收管
-
-    lv_obj_clean(page_study);
     lv_timer_pause(timer_rev);
+    irrecv.disableIRIn();    //关闭红外接收管
+    
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
 }
 
