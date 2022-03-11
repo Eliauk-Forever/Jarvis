@@ -258,8 +258,7 @@ void page_infrared()
     lv_style_set_line_color(&style_line, lv_palette_main(LV_PALETTE_BROWN));
     lv_style_set_line_rounded(&style_line, true);
 
-    lv_obj_t* line;
-    line = lv_line_create(box);
+    lv_obj_t* line = lv_line_create(box);
     lv_line_set_points(line, line_points, 2);
     lv_obj_add_style(line, &style_line, 0);
 

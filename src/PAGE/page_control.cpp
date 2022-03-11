@@ -16,7 +16,7 @@ LV_IMG_DECLARE(xinwen)
 LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
-lv_obj_t* scr_home, * scr_page, * scr_weather;
+lv_obj_t* scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
 lv_style_t img_bg;
 lv_timer_t* timer1, * timer2, * timer3;
@@ -43,13 +43,8 @@ static void btn1_event_cb(lv_event_t * event)       //控制
 
 static void btn2_event_cb(lv_event_t * event)       //天气
 {
-    scr_weather = lv_obj_create(NULL);
-    static lv_style_t blue_bg;
-    lv_style_init(&blue_bg);
-    lv_style_set_bg_color(&blue_bg, lv_color_make(0x00, 0xBB, 0xFF));
-    lv_obj_add_style(scr_weather, &blue_bg, 0);
-    lv_scr_load_anim(scr_weather, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
-    lv_obj_add_event_cb(scr_weather, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    scr_page = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
     page_weather();
 }
 

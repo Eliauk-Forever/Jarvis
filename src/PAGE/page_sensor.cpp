@@ -18,7 +18,7 @@ static void back(lv_event_t* event)       //退出当前页面
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
 }
 
-void sensor_measure(lv_timer_t * timer4)    //每2s获取一次温湿度信息
+void sensor_measure(lv_timer_t * timer_th)    //每2s获取一次温湿度信息
 {
 	if (HAL::AHT_measure(&temp, &humi)) 
     {
@@ -35,7 +35,7 @@ void sensor_measure(lv_timer_t * timer4)    //每2s获取一次温湿度信息
         lv_bar_set_value(bar_h, h, LV_ANIM_OFF);
 
         lv_label_set_text_fmt(text_t, "%d°C", t);
-        lv_label_set_text_fmt(text_h, "%dRH", h);
+        lv_label_set_text_fmt(text_h, "%d%", h);
     }
 }
 
