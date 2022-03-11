@@ -111,7 +111,7 @@ void page_setting()
 		lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
     }
 
-	lv_obj_set_size(container_About, 280, 190);
+	lv_obj_set_size(container_About, 280, 160);
 	lv_obj_align(container_About, LV_ALIGN_TOP_MID, 0, 130);
 	lv_label_set_text(text1, "名称\n"                             
 							 "系统\n"

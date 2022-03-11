@@ -3,7 +3,7 @@
 #include "page_infrared.h"
 #include "page_weather.h"
 #include "page_calendar.h"
-#include "page_time.h"
+#include "page_news.h"
 #include "page_sensor.h"
 #include "page_setting.h"
 
@@ -12,11 +12,11 @@ LV_IMG_DECLARE(desktop)
 LV_IMG_DECLARE(kongzhi)
 LV_IMG_DECLARE(tianqi)
 LV_IMG_DECLARE(rili)
-LV_IMG_DECLARE(shizhong)
+LV_IMG_DECLARE(xinwen)
 LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
-lv_obj_t* scr_home, * scr_page;
+lv_obj_t* scr_home, * scr_page, * scr_weather;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
 lv_style_t img_bg;
 lv_timer_t* timer1, * timer2, * timer3;
@@ -43,9 +43,13 @@ static void btn1_event_cb(lv_event_t * event)       //控制
 
 static void btn2_event_cb(lv_event_t * event)       //天气
 {
-    scr_page = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
-    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    scr_weather = lv_obj_create(NULL);
+    static lv_style_t blue_bg;
+    lv_style_init(&blue_bg);
+    lv_style_set_bg_color(&blue_bg, lv_color_make(0x00, 0xBB, 0xFF));
+    lv_obj_add_style(scr_weather, &blue_bg, 0);
+    lv_scr_load_anim(scr_weather, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
+    lv_obj_add_event_cb(scr_weather, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_weather();
 }
 
@@ -68,11 +72,12 @@ static void btn3_event_cb(lv_event_t * event)       //日历
     page_calendar();
 }
 
-static void btn4_event_cb(lv_event_t * event)       //时钟
+static void btn4_event_cb(lv_event_t * event)       //新闻
 {
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
-    page_time();
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+    page_news();
 }
 
 static void btn5_event_cb(lv_event_t * event)       //感知
@@ -176,6 +181,7 @@ void page_home()
     lv_style_set_bg_img_opa(&img_bg, LV_OPA_TRANSP);
 
     lv_obj_t* btn1 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn1, &img_bg, 0);
     lv_obj_set_size(btn1, 75, 75);
     lv_obj_align(btn1, LV_ALIGN_TOP_LEFT, 24, 45);
     lv_imgbtn_set_src(btn1, LV_IMGBTN_STATE_RELEASED, NULL, &kongzhi, NULL);
@@ -186,6 +192,7 @@ void page_home()
     lv_obj_align_to(label_btn1, btn1, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn2 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn2, &img_bg, 0);
     lv_obj_set_size(btn2, 75, 75);
     lv_obj_align_to(btn2, btn1, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
     lv_imgbtn_set_src(btn2, LV_IMGBTN_STATE_RELEASED, NULL, &tianqi, NULL);
@@ -196,6 +203,7 @@ void page_home()
     lv_obj_align_to(label_btn2, btn2, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn3 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn3, &img_bg, 0);
     lv_obj_set_size(btn3, 75, 75);
     lv_obj_align_to(btn3, btn2, LV_ALIGN_OUT_RIGHT_MID, 24, 0);
     lv_imgbtn_set_src(btn3, LV_IMGBTN_STATE_RELEASED, NULL, &rili, NULL);
@@ -206,16 +214,18 @@ void page_home()
     lv_obj_align_to(label_btn3, btn3, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn4 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn4, &img_bg, 0);
     lv_obj_set_size(btn4, 75, 75);
     lv_obj_align_to(btn4, label_btn1, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
-    lv_imgbtn_set_src(btn4, LV_IMGBTN_STATE_RELEASED, NULL, &shizhong, NULL);
+    lv_imgbtn_set_src(btn4, LV_IMGBTN_STATE_RELEASED, NULL, &xinwen, NULL);
     lv_obj_t* label_btn4 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn4, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
-    lv_label_set_text(label_btn4, "时钟");
+    lv_label_set_text(label_btn4, "简报");
     lv_obj_align_to(label_btn4, btn4, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn5 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn5, &img_bg, 0);
     lv_obj_set_size(btn5, 75, 75);
     lv_obj_align_to(btn5, label_btn2, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn5, LV_IMGBTN_STATE_RELEASED, NULL, &ganzhi, NULL);
@@ -226,6 +236,7 @@ void page_home()
     lv_obj_align_to(label_btn5, btn5, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn6 = lv_imgbtn_create(scr_home);
+    lv_obj_add_style(btn6, &img_bg, 0);
     lv_obj_set_size(btn6, 75, 75);
     lv_obj_align_to(btn6, label_btn3, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_imgbtn_set_src(btn6, LV_IMGBTN_STATE_RELEASED, NULL, &shezhi, NULL);

@@ -2,59 +2,92 @@
 #include "page_control.h"
 #include "page_weather.h"
 
-LV_FONT_DECLARE(myfont)
-LV_FONT_DECLARE(weatherfont)
-
-LV_IMG_DECLARE(qingtian)
-LV_IMG_DECLARE(yintian)
-LV_IMG_DECLARE(yutian)
-LV_IMG_DECLARE(yewan)
+//天气代码图标
 LV_IMG_DECLARE(null)
+LV_IMG_DECLARE(code0)
+LV_IMG_DECLARE(code1)
+LV_IMG_DECLARE(code4)
+LV_IMG_DECLARE(code5)
+LV_IMG_DECLARE(code6)
+LV_IMG_DECLARE(code7)
+LV_IMG_DECLARE(code8)
+LV_IMG_DECLARE(code9)
+LV_IMG_DECLARE(code10)
+LV_IMG_DECLARE(code11)
+LV_IMG_DECLARE(code12)
+LV_IMG_DECLARE(code13)
+LV_IMG_DECLARE(code14)
+LV_IMG_DECLARE(code15)
+LV_IMG_DECLARE(code16)
+LV_IMG_DECLARE(code17)
+LV_IMG_DECLARE(code18)
+LV_IMG_DECLARE(code30)
+LV_IMG_DECLARE(code31)
+LV_IMG_DECLARE(code32)
+LV_IMG_DECLARE(code33)
+LV_IMG_DECLARE(code37)
+LV_IMG_DECLARE(code38)
+LV_IMG_DECLARE(code99)
 
 // 心知天气HTTP请求所需信息
-String reqUserKey1 = "S-VfiR3_DeGwQpmZT";   // 私钥
+String reqUserKey = "SAtkG9P2EzpXVUE-_";   // 私钥
 String reqLocation = "ShenZhen";            // 城市
 String reqLanguage = "zh-Hans";            // 语言
 String reqUnit = "c";                      // 摄氏/华氏
-
-String reqRes = "/v3/weather/now.json?key=" + reqUserKey1 +
+String reqRes = "/v3/weather/now.json?key=" + reqUserKey +
                 + "&location=" + reqLocation + "&language=" + reqLanguage +
-                "&language=en&unit=" +reqUnit;
+                "&unit=" + reqUnit;
 
-String temperature = "", weather = "";    //用来解析Json得到的字符串
-int weather_code;
+//存放服务器的返回信息
+String results_chengshi = "", results_xianxiang = "", results_fengxiang = "";
+int results_daima, results_wendu, results_tigan, results_qiya, results_shidu, results_nengjiandu, results_dengji;
 
 WiFiClient client;
 
+lv_obj_t * bg_null;
+
 void ParseInfo(String& json)
 {
-  	const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + 2*JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(6) + 230;
-  	DynamicJsonDocument doc(capacity);	
+    StaticJsonDocument<768> doc;
   	deserializeJson(doc, json);
+    JsonObject results_0 = doc["results"][0];
+    JsonObject results_0_location = results_0["location"];
+    JsonObject results_0_now = results_0["now"];
 
-  	JsonObject results_0 = doc["results"][0];
-  	JsonObject results_0_now = results_0["now"];
-  	const char* results_0_now_text = results_0_now["text"];
-  	const char* results_0_now_code = results_0_now["code"];
-  	const char* results_0_now_temperature = results_0_now["temperature"];
-	
-  	// 通过串口监视器显示以上信息
-  	String results_0_now_text_str = results_0_now["text"].as<String>(); 
-  	int results_0_now_code_int = results_0_now["code"].as<int>(); 
-  	int results_0_now_temperature_int = results_0_now["temperature"].as<int>(); 
+    // 通过串口监视器显示以上信息
+    results_chengshi = results_0_location["name"].as<String>();          //城市名称
+  	results_xianxiang = results_0_now["text"].as<String>();              //天气现象文字
+  	results_daima = results_0_now["code"].as<int>();                        //天气现象代码
+    results_wendu = results_0_now["temperature"].as<int>();                 //温度
+    results_tigan = results_0_now["feels_like"].as<int>();                  //体感温度
+    results_qiya = results_0_now["pressure"].as<int>();                     //气压
+    results_shidu = results_0_now["humidity"].as<int>();                    //相对湿度
+    results_nengjiandu = results_0_now["visibility"].as<int>();             //能见度
+    results_fengxiang = results_0_now["wind_direction"].as<String>();    //风向文字
+    results_dengji = results_0_now["wind_scale"].as<int>();                 //风力等级
 
-    weather = results_0_now_text_str;
-    temperature = results_0_now_temperature_int;
-    weather_code = results_0_now_code_int;
-
-  	Serial.println("======Weahter Now=======");
-  	Serial.print("Weather Now: ");
-  	Serial.println(weather);
-  	Serial.print("Weather Code: ");
-  	Serial.println(weather_code);
-  	Serial.print("Temperature: ");
-  	Serial.println(temperature);
-  	Serial.println("========================");
+    Serial.println("======Weahter Now=======");
+    Serial.print("城市: ");
+  	Serial.println(results_chengshi);
+  	Serial.print("天气现象: ");
+  	Serial.println(results_xianxiang);
+  	Serial.print("天气代码: ");
+  	Serial.println(results_daima);
+    Serial.print("温度: ");
+  	Serial.println(results_wendu);
+    Serial.print("体感温度: ");
+  	Serial.println(results_tigan);
+    Serial.print("气压: ");
+  	Serial.println(results_qiya);
+    Serial.print("相对湿度: ");
+  	Serial.println(results_shidu);
+    Serial.print("能见度: ");
+  	Serial.println(results_nengjiandu);
+    Serial.print("风向: ");
+  	Serial.print(results_fengxiang);
+  	Serial.print(results_dengji);
+    Serial.println("级");
+  	Serial.println("========================"); 
 }
 
 void HttpRequest(String reqRes, const char* host)
@@ -63,18 +96,12 @@ void HttpRequest(String reqRes, const char* host)
   	String httpRequest = String("GET ") + reqRes + " HTTP/1.1\r\n" + 
   	                            "Host: " + host + "\r\n" + 
   	                            "Connection: close\r\n\r\n";
- 	// 尝试连接服务器
  	if (client.connect(host, 80))
 	{
-    	//Serial.println("Success!");
     	// 向服务器发送http请求信息
     	client.print(httpRequest);
-    	//Serial.println("Sending request: ");
-    	//Serial.println(httpRequest);
     	// 获取并显示服务器响应状态行 
     	String status_response = client.readStringUntil('\n');
-    	//Serial.print("status_response: ");
-    	//Serial.println(status_response);
 		String Answer;
 		while(client.available())
     	{
@@ -86,7 +113,6 @@ void HttpRequest(String reqRes, const char* host)
 		{
     	  	//Serial.println("Found Header End. Start Parsing.");
     	}
-
 		String JsonAnswer;
   		int JsonIndex;
   		//找到有用的返回数据位置i 返回头不要
@@ -99,115 +125,45 @@ void HttpRequest(String reqRes, const char* host)
   		  	}
   		}
   		JsonAnswer = Answer.substring(JsonIndex);
-  		//Serial.println();
-  		//Serial.println("JsonAnswer: ");
-  		//Serial.println(JsonAnswer);
-    	// 利用ArduinoJson库解析响应信息
-    	ParseInfo(JsonAnswer);
+        // Serial.println("JsonAnswer: ");
+        // Serial.println(JsonAnswer);
+    	ParseInfo(JsonAnswer);      // 利用ArduinoJson库解析响应信息
   	} 
 	else 
 	{
     	Serial.println(" connection failed!");
   	}   
-  	//断开客户端与服务器连接工作
-  	client.stop(); 
+  	client.stop();  //断开连接
 }
 
 void page_weather()
 {
-    lv_obj_t* bg = lv_img_create(scr_page);
-
-    lv_obj_t* current_tianqi = lv_label_create(bg);
-    lv_obj_t* current_wendu = lv_label_create(bg);
-    lv_obj_t* chengshi = lv_label_create(bg);
-    lv_obj_t* tags = lv_label_create(bg);
-
-    lv_obj_set_style_text_font(chengshi, &weatherfont, 0);
-    lv_obj_set_style_text_font(current_tianqi, &weatherfont, 0);
-    lv_obj_set_style_text_font(current_wendu, &weatherfont, 0);
-    lv_obj_set_style_text_font(tags, &myfont, 0);
-
-    lv_label_set_recolor(chengshi, true);
-    lv_label_set_recolor(tags, true);
-
-    lv_obj_align(chengshi, LV_ALIGN_TOP_MID, 0, 20);
-    lv_obj_align(current_wendu, LV_ALIGN_CENTER, 15, -30);
-    lv_obj_align(current_tianqi, LV_ALIGN_CENTER, 0, 30);
-    lv_obj_align(tags, LV_ALIGN_BOTTOM_MID, 0, -20);
-
     if(Wifi_status == 2)
     {
         HttpRequest(reqRes, "api.seniverse.com");
-        lv_label_set_text(chengshi, "#FF7F00 深圳市#");
-        if(weather_code == 0 || weather_code == 2)
-        {
-            lv_img_set_src(bg, &qingtian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 天气晴朗,出门玩耍吧!#");
-        }
-        else if(weather_code == 1 || weather_code == 3 || weather_code == 6 || weather_code == 8)
-        {
-            lv_img_set_src(bg, &yewan);
-            lv_obj_set_style_text_color(current_wendu, lv_color_white(), 0);
-            lv_obj_set_style_text_color(current_tianqi, lv_color_white(), 0);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 时间不早了,记得早点回家!#");
-        }
-        else if(weather_code == 4 || weather_code == 5 || weather_code == 7)
-        {
-            lv_img_set_src(bg, &yintian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 室外多云,非常适合运动!#");
-        }
-        else if(weather_code == 9)
-        {
-            lv_img_set_src(bg, &yintian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 可能会下雨,出门记得带伞!#");
-        }
-        else if(weather_code >= 10 && weather_code <= 20)
-        {
-            lv_img_set_src(bg, &yutian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 外面在下雨,出门注意安全!#");
-        }
-        else if(weather_code >= 26  && weather_code <= 36)
-        {
-            lv_img_set_src(bg, &yintian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 恶劣天气,尽量不要出门!#");
-        }
-        else if(weather_code == 37)
-        {
-            lv_img_set_src(bg, &yintian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 天气寒冷,注意保暖!#");
-        }
-        else if(weather_code == 38)
-        {
-            lv_img_set_src(bg, &qingtian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 天气炎热,注意避暑!#");
-        }
-        else
-        {
-            lv_img_set_src(bg, &qingtian);
-            lv_label_set_text_fmt(current_wendu, "%s °", temperature.c_str());
-            lv_label_set_text_fmt(current_tianqi, "%s", weather.c_str());
-            lv_label_set_text(tags, "#FF0000 未知天气!#");
-        }
+
+        lv_obj_t* img_code = lv_img_create(scr_weather);
+        lv_obj_add_style(img_code, &img_bg, 0);
+        lv_img_set_src(img_code, &code0);
+        lv_obj_align(img_code, LV_ALIGN_TOP_LEFT, 25, 15);
+
+        //第一栏部件
+        lv_obj_t* city = lv_label_create(scr_weather);
+        lv_obj_t* tianqi = lv_label_create(scr_weather);
+        lv_obj_t* wendu = lv_label_create(scr_weather);
+        lv_obj_set_style_text_font(city, &myfont, 0);
+        lv_obj_set_style_text_font(tianqi, &myfont, 0);
+        lv_label_set_recolor(city, true);
+        lv_label_set_text_fmt(city, "#CC0000 %s#", results_chengshi);
+        lv_label_set_text_fmt(tianqi, "%s", results_xianxiang);
+        lv_label_set_text_fmt(wendu, "%d°C", results_wendu);
+        lv_obj_align(city, LV_ALIGN_TOP_RIGHT, -75, 25);
+        lv_obj_align_to(tianqi, city, LV_ALIGN_CENTER, 0, 30);
+        lv_obj_align_to(wendu, tianqi, LV_ALIGN_CENTER, 0, 30);
     }
     else
     {
-        lv_img_set_src(bg, &null);
-        lv_obj_clean(bg);
+        bg_null = lv_img_create(scr_weather);
+        lv_img_set_src(bg_null, &null);
     }
 }

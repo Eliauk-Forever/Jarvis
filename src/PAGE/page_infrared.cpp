@@ -265,8 +265,8 @@ void page_infrared()
 
     lv_obj_align(staus, LV_ALIGN_TOP_MID, 0, 10);
     lv_obj_align(wendu, LV_ALIGN_TOP_MID, 0, 70);
-    lv_obj_align_to(mode, wendu, LV_ALIGN_BOTTOM_MID, -18, 30);
-    lv_obj_align_to(speed, mode, LV_ALIGN_CENTER, -25, 30);
+    lv_obj_align(mode, LV_ALIGN_CENTER, 0, 30);
+    lv_obj_align_to(speed, mode, LV_ALIGN_CENTER, -20, 30);
 
     lv_label_set_text(staus, "#DC143C 关机状态#");
     lv_label_set_text_fmt(wendu, "%d °C", Now_Temp);
