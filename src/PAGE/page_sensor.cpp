@@ -12,7 +12,7 @@ LV_IMG_DECLARE(img_h)
 float temp, humi;
 uint8_t t, h;
 
-static void back(lv_event_t* event)       //退出当前页面
+static void back_delete_cb(lv_event_t* event)       //退出当前页面
 {
     lv_timer_del(timer_th);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
@@ -35,7 +35,7 @@ void sensor_measure(lv_timer_t * timer_th)    //每2s获取一次温湿度信息
         lv_bar_set_value(bar_h, h, LV_ANIM_OFF);
 
         lv_label_set_text_fmt(text_t, "%d°C", t);
-        lv_label_set_text_fmt(text_h, "%d%", h);
+        lv_label_set_text_fmt(text_h, "%dRH", h);
     }
 }
 
@@ -48,7 +48,17 @@ void page_sensor()
 		lv_timer_ready(timer_th);
 	}
 
-    lv_obj_add_event_cb(scr_page, back, LV_EVENT_LONG_PRESSED, NULL);
+    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+
+    //小贴士
+    lv_obj_t* tips = lv_label_create(scr_page);
+    static lv_style_t tips_style;
+    lv_style_init(&tips_style);
+    lv_style_set_text_color(&tips_style, lv_palette_main(LV_PALETTE_GREEN));
+    lv_obj_add_style(tips, &tips_style, 0);
+    lv_obj_set_style_text_font(tips, &myfont, 0);
+    lv_label_set_text(tips, "Tips:人体适宜的温度夏天是\n26-28℃,冬天应在18℃-20℃,\n湿度在45%-65%");
+    lv_obj_set_pos(tips, 30, 25);
 
 	//创建温湿度图标
     lv_obj_t* img1 = lv_img_create(scr_page);
@@ -79,7 +89,7 @@ void page_sensor()
     lv_bar_set_range(bar_h, 0, 100);
     lv_obj_align_to(bar_t, img1, LV_ALIGN_OUT_RIGHT_MID, 25, 0);
     lv_obj_align_to(bar_h, bar_t, LV_ALIGN_BOTTOM_MID, 0, 50);
-
+    
 	//创建两个文本指示温湿度值
     text_t = lv_label_create(scr_page);
     text_h = lv_label_create(scr_page);

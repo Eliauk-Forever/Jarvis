@@ -236,7 +236,7 @@ void page_infrared()
 
     //创建一个信息显示窗口
     box = lv_obj_create(scr_page);
-    lv_obj_set_size(box, 130, 200);
+    lv_obj_set_size(box, 130, 170);
     lv_obj_align(box, LV_ALIGN_LEFT_MID, 5, 0);
 
     wendu = lv_label_create(box);
@@ -250,7 +250,7 @@ void page_infrared()
 
     lv_label_set_recolor(staus, true);
 
-    static lv_point_t line_points[] = { {10, 50}, {90, 50} };
+    static lv_point_t line_points[] = { {10, 35}, {90, 35} };
 
     static lv_style_t style_line;
     lv_style_init(&style_line);
@@ -262,10 +262,10 @@ void page_infrared()
     lv_line_set_points(line, line_points, 2);
     lv_obj_add_style(line, &style_line, 0);
 
-    lv_obj_align(staus, LV_ALIGN_TOP_MID, 0, 10);
-    lv_obj_align(wendu, LV_ALIGN_TOP_MID, 0, 70);
-    lv_obj_align(mode, LV_ALIGN_CENTER, 0, 30);
-    lv_obj_align_to(speed, mode, LV_ALIGN_CENTER, -20, 30);
+    lv_obj_align(staus, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_align(wendu, LV_ALIGN_TOP_MID, 0, 50);
+    lv_obj_align(mode, LV_ALIGN_CENTER, 0, 25);
+    lv_obj_align_to(speed, mode, LV_ALIGN_CENTER, -20, 25);
 
     lv_label_set_text(staus, "#DC143C 关机状态#");
     lv_label_set_text_fmt(wendu, "%d °C", Now_Temp);

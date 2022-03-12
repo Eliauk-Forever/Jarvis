@@ -8,6 +8,7 @@
 #include "page_setting.h"
 
 LV_FONT_DECLARE(myfont)
+LV_IMG_DECLARE(ironman)
 LV_IMG_DECLARE(desktop)
 LV_IMG_DECLARE(kongzhi)
 LV_IMG_DECLARE(tianqi)
@@ -16,17 +17,112 @@ LV_IMG_DECLARE(xinwen)
 LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
-lv_obj_t* scr_home, * scr_page;
+// HTTP请求所需信息
+String reqUserKey1 = "SAtkG9P2EzpXVUE-_";   				        // 心知天气私钥
+String reqLocation = "ShenZhen";            				        // 城市
+String reqLanguage = "zh-Hans";            					        // 语言
+String reqUnit = "c";                       				        // 摄氏/华氏
+String reqRes1 = "/v3/weather/now.json?key=" + reqUserKey1 +
+                + "&location=" + reqLocation + "&language=" + reqLanguage +
+                "&unit=" + reqUnit;
+String JsonAnswer;
+
+uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
+
+int results_daima, results_wendu, results_tigan, results_shidu, results_nengjiandu, results_fengsu;
+String results_chengshi = "", results_xianxiang = "";
+
+lv_obj_t* scr_setup, * scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
 lv_style_t img_bg;
 lv_timer_t* timer1, * timer2, * timer3;
 
-uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
-
 ESP32Time rtc;
 WiFiUDP ntpUDP;
-
+WiFiClient client;
 NTPClient timeClient(ntpUDP, "ntp.aliyun.com");  //NTP服务器地址
+
+void ParseInfo_xinzhi(String& json)
+{
+    StaticJsonDocument<768> doc;
+  	deserializeJson(doc, json);
+    JsonObject results_0 = doc["results"][0];
+    JsonObject results_0_location = results_0["location"];
+    JsonObject results_0_now = results_0["now"];
+
+    // 通过串口监视器显示以上信息
+    results_chengshi = results_0_location["name"].as<String>();          //城市名称
+  	results_xianxiang = results_0_now["text"].as<String>();              //天气现象文字
+  	results_daima = results_0_now["code"].as<int>();                     //天气现象代码
+    results_wendu = results_0_now["temperature"].as<int>();              //温度
+    results_tigan = results_0_now["feels_like"].as<int>();               //体感温度
+    results_shidu = results_0_now["humidity"].as<int>();                 //相对湿度
+    results_nengjiandu = results_0_now["visibility"].as<int>();          //能见度
+    results_fengsu = results_0_now["wind_speed"].as<int>();              //风速
+
+    Serial.println("======Weahter Now=======");
+    Serial.print("城市: ");
+  	Serial.println(results_chengshi);
+  	Serial.print("天气现象: ");
+  	Serial.println(results_xianxiang);
+  	Serial.print("天气代码: ");
+  	Serial.println(results_daima);
+    Serial.print("温度: ");
+  	Serial.println(results_wendu);
+    Serial.print("体感温度: ");
+  	Serial.println(results_tigan);
+    Serial.print("相对湿度: ");
+  	Serial.println(results_shidu);
+    Serial.print("能见度: ");
+  	Serial.println(results_nengjiandu);
+    Serial.print("风速: ");
+  	Serial.println(results_fengsu);
+  	Serial.println("========================"); 
+}
+
+void HttpRequest(String reqRes, const char* host)
+{	
+  	// 建立http请求信息
+  	String httpRequest = String("GET ") + reqRes + " HTTP/1.1\r\n" + 
+  	                            "Host: " + host + "\r\n" + 
+  	                            "Connection: close\r\n\r\n";
+ 	if (client.connect(host, 80))
+	{
+    	// 向服务器发送http请求信息
+    	client.print(httpRequest);
+    	// 获取并显示服务器响应状态行 
+    	String status_response = client.readStringUntil('\n');
+		String Answer;
+		while(client.available())
+    	{
+      		String line = client.readStringUntil('\r');
+      		Answer += line;
+    	}
+    	// 使用find跳过HTTP响应头
+    	if (client.find("\r\n\r\n")) 
+		{
+    	  	//Serial.println("Found Header End. Start Parsing.");
+    	}
+  		int JsonIndex;
+  		//找到有用的返回数据位置i 返回头不要
+  		for (int i = 0; i < Answer.length(); i++) 
+		{
+  		  	if (Answer[i] == '{') 
+			{
+  		    	JsonIndex = i;
+  		    	break;
+  		  	}
+  		}
+  		JsonAnswer = Answer.substring(JsonIndex);
+      	//Serial.println("JsonAnswer: ");
+      	//Serial.println(JsonAnswer);
+  	} 
+	else 
+	{
+    	Serial.println(" connection failed!");
+  	}   
+  	client.stop();  //断开连接
+}
 
 static void back_delete_cb(lv_event_t* event)
 {
@@ -67,11 +163,10 @@ static void btn3_event_cb(lv_event_t * event)       //日历
     page_calendar();
 }
 
-static void btn4_event_cb(lv_event_t * event)       //新闻
+static void btn4_event_cb(lv_event_t * event)       //信息
 {
     scr_page = lv_obj_create(NULL);
     lv_scr_load_anim(scr_page, LV_SCR_LOAD_ANIM_NONE, 50, 0, false);
-    lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
     page_news();
 }
 
@@ -111,6 +206,10 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
         rtc.setTime(currentSecond, currentMinute, currentHour, monthDay, currentMonth, currentYear);
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
 
+        //获取天气信息
+        HttpRequest(reqRes1, "api.seniverse.com");
+		ParseInfo_xinzhi(JsonAnswer);      // 利用ArduinoJson库解析响应信息
+
         lv_timer_resume(timer2);
         lv_timer_ready(timer3);
         lv_timer_pause(timer1);
@@ -123,7 +222,6 @@ void time_update(lv_timer_t * timer2)       //通过RTC获取时间,每1s执行�
     currentMinute = rtc.getMinute();
     currentSecond = rtc.getSecond();
     lv_label_set_text_fmt(home_time, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
-    //Serial.println(rtc.getTime("%Y %d %d  %H:%M:%S  %A"));
 }
 
 void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
@@ -140,10 +238,22 @@ void day_update(lv_timer_t * timer3)        //日期更新,每1h执行一次
     lv_timer_pause(timer3);
 }
 
+void page_init()
+{
+    scr_setup = lv_obj_create(NULL);
+    lv_scr_load_anim(scr_setup, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
+    lv_obj_t* bg_setup = lv_img_create(scr_setup);
+    lv_img_set_src(bg_setup, &ironman);
+    
+    lv_obj_t* spinner = lv_spinner_create(bg_setup, 2000, 40);
+    lv_obj_set_size(spinner, 50, 50);
+    lv_obj_align(spinner, LV_ALIGN_BOTTOM_RIGHT, -15, -15);
+}
+
 void page_home()
 {
     scr_home = lv_obj_create(NULL);
-    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 50, 0, true);
+    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 2100, true);
     
     //设置桌面壁纸
     lv_obj_t* bg_desktop = lv_img_create(scr_home);
@@ -216,7 +326,7 @@ void page_home()
     lv_obj_t* label_btn4 = lv_label_create(scr_home);
     lv_obj_set_style_text_color(label_btn4, lv_color_white(), 0);
     lv_obj_set_style_text_font(label_btn4, &myfont, 0);
-    lv_label_set_text(label_btn4, "简报");
+    lv_label_set_text(label_btn4, "信息");
     lv_obj_align_to(label_btn4, btn4, LV_ALIGN_BOTTOM_MID, 0, 20);
 
     lv_obj_t* btn5 = lv_imgbtn_create(scr_home);
@@ -258,7 +368,7 @@ void page_home()
 
 void Gui_Init(void)
 {
-    //page_init();
+    page_init();
     page_home();
     HAL::Wifi_Connect();
 }

@@ -15,6 +15,10 @@ extern lv_style_t img_bg;
 //时间&日期变量
 extern uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
 
+//存放服务器的返回信息
+extern int results_daima, results_wendu, results_tigan, results_shidu, results_nengjiandu, results_fengsu;
+extern String results_chengshi, results_xianxiang;
+
 void Gui_Init(void);
 
 #ifdef __cplusplus

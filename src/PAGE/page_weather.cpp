@@ -3,7 +3,6 @@
 #include "page_weather.h"
 
 //天气代码图标
-LV_IMG_DECLARE(null)
 LV_IMG_DECLARE(code0)
 LV_IMG_DECLARE(code1)
 LV_IMG_DECLARE(code4)
@@ -14,7 +13,6 @@ LV_IMG_DECLARE(code8)
 LV_IMG_DECLARE(code9)
 LV_IMG_DECLARE(code10)
 LV_IMG_DECLARE(code11)
-LV_IMG_DECLARE(code12)
 LV_IMG_DECLARE(code13)
 LV_IMG_DECLARE(code14)
 LV_IMG_DECLARE(code15)
@@ -28,23 +26,9 @@ LV_IMG_DECLARE(code33)
 LV_IMG_DECLARE(code37)
 LV_IMG_DECLARE(code38)
 LV_IMG_DECLARE(code99)
+LV_IMG_DECLARE(null)
 
-// 心知天气HTTP请求所需信息
-String reqUserKey = "SAtkG9P2EzpXVUE-_";   // 私钥
-String reqLocation = "ShenZhen";            // 城市
-String reqLanguage = "zh-Hans";            // 语言
-String reqUnit = "c";                      // 摄氏/华氏
-String reqRes = "/v3/weather/now.json?key=" + reqUserKey +
-                + "&location=" + reqLocation + "&language=" + reqLanguage +
-                "&unit=" + reqUnit;
-
-//存放服务器的返回信息
-String results_chengshi = "", results_xianxiang = "";
-int results_daima, results_wendu, results_tigan, results_shidu, results_nengjiandu, results_fengsu;
-
-WiFiClient client;
-
-lv_obj_t * bg_null, * shijian;
+lv_obj_t* shijian;
 lv_timer_t* timer_update;
 
 static void back(lv_event_t* event)
@@ -53,93 +37,9 @@ static void back(lv_event_t* event)
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);   //退出后删除页面
 }
 
-void ParseInfo(String& json)
-{
-    StaticJsonDocument<768> doc;
-  	deserializeJson(doc, json);
-    JsonObject results_0 = doc["results"][0];
-    JsonObject results_0_location = results_0["location"];
-    JsonObject results_0_now = results_0["now"];
-
-    // 通过串口监视器显示以上信息
-    results_chengshi = results_0_location["name"].as<String>();          //城市名称
-  	results_xianxiang = results_0_now["text"].as<String>();              //天气现象文字
-  	results_daima = results_0_now["code"].as<int>();                     //天气现象代码
-    results_wendu = results_0_now["temperature"].as<int>();              //温度
-    results_tigan = results_0_now["feels_like"].as<int>();               //体感温度
-    results_shidu = results_0_now["humidity"].as<int>();                 //相对湿度
-    results_nengjiandu = results_0_now["visibility"].as<int>();          //能见度
-    results_fengsu = results_0_now["wind_speed"].as<int>();              //风速
-
-    Serial.println("======Weahter Now=======");
-    Serial.print("城市: ");
-  	Serial.println(results_chengshi);
-  	Serial.print("天气现象: ");
-  	Serial.println(results_xianxiang);
-  	Serial.print("天气代码: ");
-  	Serial.println(results_daima);
-    Serial.print("温度: ");
-  	Serial.println(results_wendu);
-    Serial.print("体感温度: ");
-  	Serial.println(results_tigan);
-    Serial.print("相对湿度: ");
-  	Serial.println(results_shidu);
-    Serial.print("能见度: ");
-  	Serial.println(results_nengjiandu);
-    Serial.print("风速: ");
-  	Serial.println(results_fengsu);
-  	Serial.println("========================"); 
-}
-
-void HttpRequest(String reqRes, const char* host)
-{	
-  	// 建立http请求信息
-  	String httpRequest = String("GET ") + reqRes + " HTTP/1.1\r\n" + 
-  	                            "Host: " + host + "\r\n" + 
-  	                            "Connection: close\r\n\r\n";
- 	if (client.connect(host, 80))
-	{
-    	// 向服务器发送http请求信息
-    	client.print(httpRequest);
-    	// 获取并显示服务器响应状态行 
-    	String status_response = client.readStringUntil('\n');
-		String Answer;
-		while(client.available())
-    	{
-      		String line = client.readStringUntil('\r');
-      		Answer += line;
-    	}
-    	// 使用find跳过HTTP响应头
-    	if (client.find("\r\n\r\n")) 
-		{
-    	  	//Serial.println("Found Header End. Start Parsing.");
-    	}
-		String JsonAnswer;
-  		int JsonIndex;
-  		//找到有用的返回数据位置i 返回头不要
-  		for (int i = 0; i < Answer.length(); i++) 
-		{
-  		  	if (Answer[i] == '{') 
-			{
-  		    	JsonIndex = i;
-  		    	break;
-  		  	}
-  		}
-  		JsonAnswer = Answer.substring(JsonIndex);
-        Serial.println("JsonAnswer: ");
-        Serial.println(JsonAnswer);
-    	ParseInfo(JsonAnswer);      // 利用ArduinoJson库解析响应信息
-  	} 
-	else 
-	{
-    	Serial.println(" connection failed!");
-  	}   
-  	client.stop();  //断开连接
-}
-
 void update(lv_timer_t * timer_update)
 {
-    lv_label_set_text_fmt(shijian, "%d:%d:%d", currentHour, currentMinute, currentSecond);
+    lv_label_set_text_fmt(shijian, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
 }
 
 void page_weather()
@@ -149,7 +49,6 @@ void page_weather()
 
     if(Wifi_status == 2)
     {
-        HttpRequest(reqRes, "api.seniverse.com");
 		lv_timer_ready(timer_update);
 
         lv_obj_set_scrollbar_mode(scr_page, LV_SCROLLBAR_MODE_ACTIVE);
@@ -196,23 +95,23 @@ void page_weather()
             case 4: lv_img_set_src(img_code, &code4);break;
             case 5: lv_img_set_src(img_code, &code5);break;
             case 6: lv_img_set_src(img_code, &code6);break;
-            case 7: lv_img_set_src(img_code, &code7);break;
-            case 8: lv_img_set_src(img_code, &code8);break;
+            case 7: lv_img_set_src(img_code, &code5);break;
+            case 8: lv_img_set_src(img_code, &code6);break;
             case 9: lv_img_set_src(img_code, &code9);break;
             case 10: lv_img_set_src(img_code, &code10);break;
             case 11: lv_img_set_src(img_code, &code11);break;
-            case 13: lv_img_set_src(img_code, &code13);break;
-            case 14: lv_img_set_src(img_code, &code14);break;
+            case 13: lv_img_set_src(img_code, &code15);break;
+            case 14: lv_img_set_src(img_code, &code15);break;
             case 15: lv_img_set_src(img_code, &code15);break;
-            case 16: lv_img_set_src(img_code, &code16);break;
+            case 16: lv_img_set_src(img_code, &code17);break;
             case 17: lv_img_set_src(img_code, &code17);break;
-            case 18: lv_img_set_src(img_code, &code18);break;
-            case 30: lv_img_set_src(img_code, &code30);break;
-            case 31: lv_img_set_src(img_code, &code31);break;
-            case 32: lv_img_set_src(img_code, &code32);break;
-            case 33: lv_img_set_src(img_code, &code33);break;
-            case 37: lv_img_set_src(img_code, &code37);break;
-            case 38: lv_img_set_src(img_code, &code38);break;      
+            case 18: lv_img_set_src(img_code, &code17);break;
+            //case 30: lv_img_set_src(img_code, &code30);break;
+            //case 31: lv_img_set_src(img_code, &code31);break;
+            //case 32: lv_img_set_src(img_code, &code32);break;
+            //case 33: lv_img_set_src(img_code, &code33);break;
+            //case 37: lv_img_set_src(img_code, &code37);break;
+            case 38: lv_img_set_src(img_code, &code0);break;
             default: lv_img_set_src(img_code, &code99);break;
         }
 
@@ -277,7 +176,7 @@ void page_weather()
     }
     else
     {
-        bg_null = lv_img_create(scr_page);
+        lv_obj_t* bg_null = lv_img_create(scr_page);
         lv_timer_pause(timer_update);
         lv_img_set_src(bg_null, &null);
     }

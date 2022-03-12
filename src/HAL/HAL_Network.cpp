@@ -113,8 +113,8 @@ bool HAL::AutoConfig()
   	  	}
   	  	else
   	  	{
-  	  	  	Serial.print("WIFI AutoConfig Waiting......");
-  	  	  	Serial.println(wstatus);
+  	  	  	Serial.println("WIFI AutoConfig Waiting...");
+  	  	  	//Serial.println(wstatus);
   	  	  	delay(1000);
   	  	}
   	}
