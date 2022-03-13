@@ -89,8 +89,8 @@
 // If colours are inverted (white shows as black) then uncomment one of the next
 // 2 lines try both options, one of the options should correct the inversion.
 
-// #define TFT_INVERSION_ON
- #define TFT_INVERSION_OFF
+//#define TFT_INVERSION_ON
+#define TFT_INVERSION_OFF
 
 // If a backlight control signal is available then define the TFT_BL pin in Section 2
 // below. The backlight will be turned ON when tft.begin() is called, but the library
@@ -98,7 +98,7 @@
 // driven with a PWM signal or turned OFF/ON then this must be handled by the user
 // sketch. e.g. with digitalWrite(TFT_BL, LOW);
 
- #define TFT_BACKLIGHT_ON HIGH  // HIGH or LOW are options
+//#define TFT_BACKLIGHT_ON LOW  // HIGH or LOW are options
 
 // ##################################################################################
 //
@@ -193,7 +193,7 @@
 #define TFT_DC   12  // Data Command control pin
 #define TFT_RST  4  // Reset pin (could connect to RST pin)
 #define TOUCH_CS 17     // Chip select pin (T_CS) of touch screen
-
+//#define TFT_BL   2
 //#define TFT_WR 22    // Write strobe for modified Raspberry Pi TFT only
 
 // For the M5Stack module use these #define lines

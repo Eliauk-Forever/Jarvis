@@ -94,7 +94,7 @@
 
 
 // Identical looking TFT displays may have a different colour ordering in the 16 bit colour
-#define TFT_BGR 1   // Colour order Blue-Green-Red
+#define TFT_BGR 1  // Colour order Blue-Green-Red
 #define TFT_RGB 0   // Colour order Red-Green-Blue
 
 // Legacy setup support, RPI_DISPLAY_TYPE replaces RPI_DRIVER

@@ -51,16 +51,17 @@ void touchpad_read( lv_indev_drv_t * indev_driver, lv_indev_data_t * data )
 void Screen_Init()
 {
     HAL::Backlight_Init();
-    HAL::SetBackLight(0);
-
-    lv_init();
+    Serial.print("当前屏幕亮度为:");
+    Serial.print(currentBacklight);
+    Serial.println("%");
 
     tft.begin(); /* TFT init */
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
     tft.setTouch( calData );
-    tft.writecommand(ST7789_DISPON); //Display on
-
+    tft.writecommand(ST7789_DISPON);
+    
+    lv_init();
     lv_disp_draw_buf_init( &draw_buf, buf, NULL, screenWidth * screenHeight / 2 );
 
     /*Initialize the display*/
@@ -80,5 +81,7 @@ void Screen_Init()
     indev_drv.read_cb = touchpad_read;
     lv_indev_drv_register( &indev_drv );
 
-    HAL::SetBackLight(500);
+    delay(200);
+    HAL::Backlight_SetGradual(700, 500);
+    
 }

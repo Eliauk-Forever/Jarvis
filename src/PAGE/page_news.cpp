@@ -19,9 +19,12 @@ void page_news()
     {
         lv_obj_t* news_tab = lv_tabview_create(scr_page, LV_DIR_LEFT, 50);
         lv_obj_add_event_cb(news_tab, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
+        lv_obj_clear_flag(lv_tabview_get_content(news_tab), LV_OBJ_FLAG_SCROLLABLE);		//禁止滚动
         lv_obj_set_style_text_font(news_tab, &myfont, 0);
         lv_obj_t* tab1 = lv_tabview_add_tab(news_tab, "国内疫情");
         lv_obj_t* tab2 = lv_tabview_add_tab(news_tab, "今日新闻");
+        lv_obj_set_scrollbar_mode(tab1, LV_SCROLLBAR_MODE_OFF);
+        lv_obj_clear_flag(tab1, LV_OBJ_FLAG_SCROLLABLE);
 
         //疫情数据
         lv_obj_t* text1 = lv_label_create(tab1);    //现有确诊
@@ -30,7 +33,8 @@ void page_news()
         lv_obj_t* text4 = lv_label_create(tab1);    //境外输入
         lv_obj_t* text5 = lv_label_create(tab1);    //累计治愈
         lv_obj_t* text6 = lv_label_create(tab1);    //累计死亡
-        lv_obj_t* text7 = lv_label_create(tab1);    //TIP
+        lv_obj_t* text7 = lv_label_create(tab1);    //更新时间
+        lv_obj_t* text8 = lv_label_create(tab1);    //TIP
 
         lv_obj_set_style_text_font(text1, &myfont, 0);
         lv_obj_set_style_text_font(text2, &myfont, 0);
@@ -39,6 +43,7 @@ void page_news()
         lv_obj_set_style_text_font(text5, &myfont, 0);
         lv_obj_set_style_text_font(text6, &myfont, 0);
         lv_obj_set_style_text_font(text7, &myfont, 0);
+        lv_obj_set_style_text_font(text8, &myfont, 0);
         lv_label_set_recolor(text1, true);          //文本重新着色
         lv_label_set_recolor(text2, true);
         lv_label_set_recolor(text3, true);
@@ -46,6 +51,7 @@ void page_news()
         lv_label_set_recolor(text5, true);
         lv_label_set_recolor(text6, true);
         lv_label_set_recolor(text7, true);
+        lv_label_set_recolor(text8, true);
 
         lv_label_set_text(text1, "现有确诊\n#FFA400 237111#");
         lv_label_set_text(text2, "累积确诊\n#9B4400 389823#");
@@ -53,38 +59,40 @@ void page_news()
         lv_label_set_text(text4, "境外输入\n#44CEF6 16106#");
         lv_label_set_text(text5, "累计治愈\n#40DE5A 143494#");
         lv_label_set_text(text6, "累计死亡\n#758A99 9218#");
-        lv_label_set_text(text7, "#F47983 疫情未结束,防疫别大意#\n#F47983 外出佩戴好口罩!#");
+        lv_label_set_text(text7, "#FF3300 更新时间:2022/3/12#");
+        lv_label_set_text(text8, "#F47983 疫情未结束,防疫别大意#\n#F47983 外出佩戴好口罩!#");
 
         lv_obj_set_pos(text1, 15, 0);
         lv_obj_set_pos(text2, 145, 0);
-        lv_obj_set_pos(text3, 15, 55);
-        lv_obj_set_pos(text4, 145, 55);
-        lv_obj_set_pos(text5, 15, 110);
-        lv_obj_set_pos(text6, 145, 110);
-        lv_obj_set_pos(text7, 15, 170);
+        lv_obj_set_pos(text3, 15, 50);
+        lv_obj_set_pos(text4, 145, 50);
+        lv_obj_set_pos(text5, 15, 100);
+        lv_obj_set_pos(text6, 145, 100);
+        lv_obj_set_pos(text7, 15, 150);
+        lv_obj_set_pos(text8, 15, 175);
 
         //新闻数据
-        lv_obj_t* text8 = lv_label_create(tab2);
         lv_obj_t* text9 = lv_label_create(tab2);
         lv_obj_t* text10 = lv_label_create(tab2);
+        lv_obj_t* text11 = lv_label_create(tab2);
 
         static lv_style_t news_style;
         lv_style_init(&news_style);
         lv_style_set_text_color(&news_style, lv_palette_main(LV_PALETTE_BLUE_GREY));
-        lv_obj_add_style(text8, &news_style, 0);
         lv_obj_add_style(text9, &news_style, 0);
         lv_obj_add_style(text10, &news_style, 0);
-        lv_obj_set_style_text_font(text1, &myfont, 0);
-        lv_obj_set_style_text_font(text2, &myfont, 0);
-        lv_obj_set_style_text_font(text3, &myfont, 0);
+        lv_obj_add_style(text11, &news_style, 0);
+        lv_obj_set_style_text_font(text9, &myfont, 0);
+        lv_obj_set_style_text_font(text10, &myfont, 0);
+        lv_obj_set_style_text_font(text11, &myfont, 0);
 
-        lv_label_set_text(text8, "1.巴黎圣日尔曼总比分\n2-3不敌皇家马德里,\n止步欧冠16强");
-        lv_label_set_text(text9, "2.第18金!中国轮椅冰\n壶队摘得金牌");
-        lv_label_set_text(text10, "3.乌方称俄首次向乌\n西部发起进攻,俄证实\n摧毁两机场");
+        lv_label_set_text(text9, "1.巴黎圣日尔曼总比分\n2-3不敌皇家马德里,\n止步欧冠16强");
+        lv_label_set_text(text10, "2.第18金!中国轮椅冰\n壶队摘得金牌");
+        lv_label_set_text(text11, "3.乌方称俄首次向乌\n西部发起进攻,俄证实\n摧毁两机场");
 
-        lv_obj_set_pos(text8, 10, 5);
-        lv_obj_set_pos(text9, 10, 85);
-        lv_obj_set_pos(text10, 10, 145);
+        lv_obj_set_pos(text9, 10, 5);
+        lv_obj_set_pos(text10, 10, 85);
+        lv_obj_set_pos(text11, 10, 145);
 
     }
     else

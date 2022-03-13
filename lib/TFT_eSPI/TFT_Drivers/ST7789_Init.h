@@ -113,7 +113,7 @@
   delay(120);
   begin_tft_write();
 
-  // writecommand(ST7789_DISPON);    //Display on
+  //writecommand(ST7789_DISPON);    //Display on
   delay(120);
 
 #ifdef TFT_BL

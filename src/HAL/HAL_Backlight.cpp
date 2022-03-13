@@ -1,27 +1,53 @@
 #include "HAL/HAL.h"
-
+#include "lvgl.h"
 #define CONFIG_SCREEN_BLK_PIN 2
 
-/**
-  * @brief  ±³¹â³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+uint32_t currentBacklight = 0;
+
+//èƒŒå…‰åˆå§‹åŒ–
 void HAL::Backlight_Init()
 {
-    /*PWM³õÊ¼»¯£¬1024¼¶£¬5KHzÆµÂÊ*/
-    ledcSetup(0, 5000, 10);
-    ledcAttachPin(CONFIG_SCREEN_BLK_PIN, 0);
+	//PWMåˆå§‹åŒ–,1024çº§,5kHzÆµé¢‘ç‡
+	ledcSetup(0, 5000, 10);
+	ledcAttachPin(CONFIG_SCREEN_BLK_PIN, 0);
+	ledcWrite(0, 1024);  //å…³é—­èƒŒå…‰
 }
 
-/**
-  * @brief  ÉèÖÃ±³¹âÁÁ¶È
-  * @param  val: ÁÁ¶È(0~1000 -> 0~100%)
-  * @retval ÎŞ
-  */
-void HAL::SetBackLight(int32_t val)
+//è·å–å½“å‰èƒŒå…‰äº®åº¦
+uint32_t HAL::Backlight_GetValue()
 {
-    val = constrain(val, 0, 1024);
-    val = 1024 - val;
-    ledcWrite(0, val);
+	return currentBacklight;
+}
+
+//èƒŒå…‰äº®åº¦è®¾ç½®(0-1000 -> 0-100%)
+void HAL::Backlight_SetValue(int32_t val)
+{
+	val = constrain(val, 0, 1024);
+	currentBacklight = map(val, 0, 1024, 0, 100);		//æ˜ å°„å‡½æ•°
+	val =  1024 - val;
+	ledcWrite(0, val);
+}
+
+//èƒŒå…‰æ¸äº®
+static void Backlight_AnimCallback(void *obj, int32_t brightness)
+{
+	HAL::Backlight_SetValue(brightness);
+}
+
+void HAL::Backlight_SetGradual(uint32_t target, uint16_t time)
+{
+	lv_anim_t a;
+	lv_anim_init(&a);
+	lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t) Backlight_AnimCallback);
+	lv_anim_set_values(&a, Backlight_GetValue(), target);
+	lv_anim_set_time(&a, time);
+	lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+	lv_anim_start(&a);
+}
+
+//èƒŒå…‰å¼ºåˆ¶ç‚¹äº®
+void HAL::Backlight_ForceLit(bool en)
+{
+	pinMode(CONFIG_SCREEN_BLK_PIN, OUTPUT);
+	digitalWrite(CONFIG_SCREEN_BLK_PIN, en);
 }

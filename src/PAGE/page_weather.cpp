@@ -78,7 +78,7 @@ void page_weather()
             case 4: lv_label_set_text_fmt(date, "#C93756 星期四%u/%d#", currentMonth, monthDay);break;
             case 5: lv_label_set_text_fmt(date, "#C93756 星期五%u/%d#", currentMonth, monthDay);break;
             case 6: lv_label_set_text_fmt(date, "#C93756 星期六%u/%d#", currentMonth, monthDay);break;
-            case 7: lv_label_set_text_fmt(date, "#C93756 星期天%u/%d#", currentMonth, monthDay);break;
+            default: lv_label_set_text_fmt(date, "#C93756 星期天%u/%d#", currentMonth, monthDay);break;
         }
 
         lv_obj_align(shijian, LV_ALIGN_TOP_LEFT, 15, 30);

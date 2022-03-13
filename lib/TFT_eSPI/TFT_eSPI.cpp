@@ -501,7 +501,7 @@ TFT_eSPI::TFT_eSPI(int16_t w, int16_t h)
 ***************************************************************************************/
 void TFT_eSPI::begin(uint8_t tc)
 {
- init(tc);
+ 	init(tc);
 }
 
 
@@ -669,7 +669,6 @@ void TFT_eSPI::init(uint8_t tc)
     pinMode(TFT_BL, OUTPUT);
     digitalWrite(TFT_BL, HIGH);
   #endif
-  //writecommand(ST7789_DISPON);
 #endif
 }
 

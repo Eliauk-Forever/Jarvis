@@ -23,6 +23,7 @@
 #include <ir_Gree.h>
 
 extern uint8_t Wifi_status;
+extern uint32_t currentBacklight;
 
 namespace HAL
 {
@@ -33,7 +34,10 @@ namespace HAL
 
 /* Backlight */
     void Backlight_Init();
-    void SetBackLight(int32_t val);
+    uint32_t Backlight_GetValue();
+    void Backlight_SetValue(int32_t val);
+    void Backlight_SetGradual(uint32_t target, uint16_t time = 500);
+    void Backlight_ForceLit(bool en);
     
 /* SD */
     bool SD_Init();

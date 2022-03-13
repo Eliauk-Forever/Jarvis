@@ -1,7 +1,7 @@
 /**
  * @ Author: LAN
- * @ Modified time: 2022-03-12 23:17:58
- * @ Description: 增加天气界面和红外功能
+ * @ Modified time: 2022-03-13 17:27:05
+ * @ Description: 解决了上电雪花屏的问题
  */
 
 #include "HAL/HAL.h"
