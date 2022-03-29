@@ -1,7 +1,7 @@
 /**
  * @ Author: LAN
- * @ Modified time: 2022-03-13 17:27:05
- * @ Description: 解决了上电雪花屏的问题
+ * @ Modified time: 2022-03-29 23:52:08
+ * @ Description: 增加了蜂鸣器播放音乐功能
  */
 
 #include "HAL/HAL.h"

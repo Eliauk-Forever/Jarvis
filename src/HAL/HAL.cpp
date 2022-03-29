@@ -24,6 +24,8 @@ void HAL::Init()
 	Serial.println("\n");
 
 	HAL::SD_Init();
+	HAL::Buzz_init();
+    HAL::Audio_Init();
 
 }
 
@@ -34,7 +36,8 @@ void HAL::Wifi_Connect()
 
 void HAL::Update()
 {
+	HAL::Audio_Update();
 	lv_task_handler();
 	HAL::HandleClient();
-	delay(5);
+	delay(20);
 }

@@ -23,6 +23,7 @@ int num = 0;
 
 static void power(lv_event_t* t)       //开关机
 {
+    HAL::Buzz_Tone(300, 5);
     if (Power_staus == 0)
     {
         ac.on();
@@ -41,6 +42,7 @@ static void power(lv_event_t* t)       //开关机
 
 static void temp_add(lv_event_t* t)       //升高温度
 {
+    HAL::Buzz_Tone(300, 5);
     Now_Temp++;
     if (Now_Temp > 30)
     {
@@ -53,6 +55,7 @@ static void temp_add(lv_event_t* t)       //升高温度
 
 static void temp_reduce(lv_event_t* t)       //降低温度
 {
+    HAL::Buzz_Tone(300, 5);
     Now_Temp--;
     if (Now_Temp < 16)
     {
@@ -65,6 +68,7 @@ static void temp_reduce(lv_event_t* t)       //降低温度
 
 static void change_mode(lv_event_t* t)       //工作模式
 {
+    HAL::Buzz_Tone(300, 5);
     Now_Mode++;
     if (Now_Mode > 3)
     {
@@ -94,6 +98,7 @@ static void change_mode(lv_event_t* t)       //工作模式
 
 static void change_speed(lv_event_t* t)       //风速
 {
+    HAL::Buzz_Tone(300, 5);
     Now_Speed++;
     if (Now_Speed > 4)
     {
@@ -140,6 +145,7 @@ void sign_rev(lv_timer_t * timer_rev)       //通过红外接收管获取脉冲�
 
 static void save(lv_event_t* t)       //保存当前项,进入下一项
 {
+    HAL::Buzz_Tone(300, 5);
     num++;
     if (num > 4)
     {
@@ -176,6 +182,7 @@ static void save(lv_event_t* t)       //保存当前项,进入下一项
 
 static void quit(lv_event_t* t)       //退出学习模式,返回控制界面
 {
+    HAL::Buzz_Tone(300, 5);
     lv_timer_pause(timer_rev);
     irrecv.disableIRIn();    //关闭红外接收管
     
@@ -184,6 +191,7 @@ static void quit(lv_event_t* t)       //退出学习模式,返回控制界面
 
 static void mode_study(lv_event_t* t)       //进入学习模式
 {
+    HAL::Buzz_Tone(300, 5);
     irrecv.enableIRIn();    //开启红外接收管
 
     page_study = lv_obj_create(NULL);

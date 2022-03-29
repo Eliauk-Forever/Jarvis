@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <Arduino.h>
+#include <FreeRTOS.h>
 #include <Wire.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
@@ -15,6 +16,7 @@
 #include <esp_wifi.h>
 #include <HTTPClient.h>
 #include "Version.h"
+#include "CommonMacro.h"
 
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
@@ -55,6 +57,17 @@ namespace HAL
     bool AHT_measure(float *temp, float *humi);
     float AHT_getTemperature();
     float AHT_getHumidity();
+
+/* Buzzer */
+    void Buzz_init();
+    void Buzz_SetEnable(bool en);
+    bool Get_Buzzer_staus();
+    void Buzz_Tone(uint32_t freq, int32_t duration = 0);
+
+/* Audio */
+    void Audio_Init();
+    void Audio_Update();
+    bool Audio_PlayMusic(const char* name);
 }
 
 #endif

@@ -2,7 +2,7 @@
 #include "page_control.h"
 #include "page_setting.h"
 
-lv_obj_t* status, * label_SSID, * label_IP, * SSID, * IP, * label_MAC, * MAC, * sw_backlight, * sw_voice;
+lv_obj_t* status, * label_SSID, * label_IP, * SSID, * IP, * label_MAC, * MAC, * sw_backlight, * sw_ble;
 int newBacklight;
 
 String ip2Str(IPAddress ip)		//IP地址转字符串
@@ -43,6 +43,7 @@ static void wifi_event_handler(lv_event_t* b)
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
 		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
             }
+			HAL::Audio_PlayMusic("Connect");
 		}
 		else
 		{
@@ -51,26 +52,39 @@ static void wifi_event_handler(lv_event_t* b)
 		    lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		    lv_label_set_text(SSID, "");
 		    lv_label_set_text(IP, "");
+
+			HAL::Audio_PlayMusic("Disconnect");
 		}
 	}
 }
 
-static void set_backlight(lv_event_t* c)
+static void buzz_event_handler(lv_event_t* c)
 {
-    sw_backlight = lv_event_get_target(c);
+	lv_event_code_t code = lv_event_get_code(c);
+	lv_obj_t* obj = lv_event_get_target(c);
+	if (code == LV_EVENT_VALUE_CHANGED)
+	{
+		if (lv_obj_has_state(obj, LV_STATE_CHECKED))
+		{
+			HAL::Buzz_SetEnable(true);
+			HAL::Audio_PlayMusic("DeviceInsert");
+		}
+		else
+		{
+			HAL::Buzz_SetEnable(false);	
+		}
+	}
+}
+
+static void set_backlight(lv_event_t* d)
+{
+    sw_backlight = lv_event_get_target(d);
     char buf[8];
     lv_snprintf(buf, sizeof(buf), "%d%%", (int)lv_slider_get_value(sw_backlight));
 
 	currentBacklight = (int)lv_slider_get_value(sw_backlight);
 	newBacklight = map(currentBacklight, 5, 100, 50, 1024);
 	HAL::Backlight_SetValue(newBacklight);
-}
-
-static void set_voice(lv_event_t* d)
-{
-    sw_voice = lv_event_get_target(d);
-    char buf[8];
-    lv_snprintf(buf, sizeof(buf), "%d%%", (int)lv_slider_get_value(sw_voice));
 }
 
 void page_setting()
@@ -167,12 +181,12 @@ void page_setting()
 	lv_label_set_text(text3, "WIFI开关");    
 	lv_obj_set_pos(text3, 0, 10);
     lv_obj_t* sw_wifi = lv_switch_create(tab3);
-    if(Wifi_status == 2)
+	lv_obj_set_size(sw_wifi, 50, 25);
+	lv_obj_set_pos(sw_wifi, 120, 10);
+	if(Wifi_status == 2)
     {
         lv_obj_add_state(sw_wifi, LV_STATE_CHECKED);
     }   
-	lv_obj_set_size(sw_wifi, 50, 25);
-	lv_obj_set_pos(sw_wifi, 120, 10);
 	lv_obj_add_event_cb(sw_wifi, wifi_event_handler, LV_EVENT_ALL, NULL);
 
 	//屏幕背光亮度控制
@@ -190,20 +204,21 @@ void page_setting()
 	lv_obj_t* text5 = lv_label_create(tab3);
     lv_obj_set_style_text_font(text5, &myfont, 0);
     lv_label_set_text(text5, "蜂鸣器开关");
-    lv_obj_set_pos(text5, 0, 100);
+    lv_obj_set_pos(text5, 0, 95);
     lv_obj_t* sw_buzzer = lv_switch_create(tab3);
     lv_obj_set_size(sw_buzzer, 50, 25);
-    lv_obj_add_state(sw_buzzer, LV_STATE_CHECKED);
-    lv_obj_set_pos(sw_buzzer, 120, 100);
+    lv_obj_set_pos(sw_buzzer, 120, 95);
+	if(HAL::Get_Buzzer_staus())
+    {
+        lv_obj_add_state(sw_buzzer, LV_STATE_CHECKED);
+    }   
+	lv_obj_add_event_cb(sw_buzzer, buzz_event_handler, LV_EVENT_ALL, NULL);
 
     lv_obj_t* text6 = lv_label_create(tab3);
     lv_obj_set_style_text_font(text6, &myfont, 0);
-    lv_label_set_text(text6, "设备音量");
-    lv_obj_set_pos(text6, 0, 140);
-    sw_voice = lv_slider_create(tab3);
-    lv_obj_set_pos(sw_voice, 120, 140);
-    lv_obj_set_size(sw_voice, 140, 20);
-    lv_slider_set_range(sw_voice, 10, 100);
-    lv_slider_set_value(sw_voice, 50, LV_ANIM_OFF);
-    lv_obj_add_event_cb(sw_voice, set_voice, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_label_set_text(text6, "蓝牙开关");
+    lv_obj_set_pos(text6, 0, 135);
+	lv_obj_t* sw_ble = lv_switch_create(tab3);
+    lv_obj_set_size(sw_ble, 50, 25);
+    lv_obj_set_pos(sw_ble, 120, 135);
 }

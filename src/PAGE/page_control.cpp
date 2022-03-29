@@ -18,13 +18,11 @@ LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
 // HTTP请求所需信息
-String reqUserKey1 = "SAtkG9P2EzpXVUE-_";   				        // 心知天气私钥
-String reqLocation = "ShenZhen";            				        // 城市
-String reqLanguage = "zh-Hans";            					        // 语言
-String reqUnit = "c";                       				        // 摄氏/华氏
-String reqRes1 = "/v3/weather/now.json?key=" + reqUserKey1 +
-                + "&location=" + reqLocation + "&language=" + reqLanguage +
-                "&unit=" + reqUnit;
+String reqUserKey = "SWm7P52lp4kw1UosX";   				     	 // 私钥
+String reqLocation = "shenzhen";            				     // 城市
+
+String reqRes = "/v3/weather/now.json?key=" + reqUserKey + "&location=" + reqLocation
+                + "&language=zh-Hans&unit=c";
 String JsonAnswer;
 
 uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
@@ -207,12 +205,14 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
 
         //获取天气信息
-        HttpRequest(reqRes1, "api.seniverse.com");
+        HttpRequest(reqRes, "api.seniverse.com");
 		ParseInfo_xinzhi(JsonAnswer);      // 利用ArduinoJson库解析响应信息
 
         lv_timer_resume(timer2);
         lv_timer_ready(timer3);
         lv_timer_pause(timer1);
+
+		HAL::Audio_PlayMusic("Connect");
 	}
 }
 
@@ -254,6 +254,8 @@ void page_home()
 {
     scr_home = lv_obj_create(NULL);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 2100, true);
+
+	HAL::Audio_PlayMusic("Startup");
     
     //设置桌面壁纸
     lv_obj_t* bg_desktop = lv_img_create(scr_home);
