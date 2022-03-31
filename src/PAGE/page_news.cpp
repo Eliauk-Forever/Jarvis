@@ -21,7 +21,7 @@ void page_news()
         lv_obj_add_event_cb(news_tab, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
         lv_obj_clear_flag(lv_tabview_get_content(news_tab), LV_OBJ_FLAG_SCROLLABLE);		//禁止滚动
         lv_obj_set_style_text_font(news_tab, &myfont, 0);
-        lv_obj_t* tab1 = lv_tabview_add_tab(news_tab, "国内疫情");
+        lv_obj_t* tab1 = lv_tabview_add_tab(news_tab, "本地疫情");
         lv_obj_t* tab2 = lv_tabview_add_tab(news_tab, "今日新闻");
         lv_obj_set_scrollbar_mode(tab1, LV_SCROLLBAR_MODE_OFF);
         lv_obj_clear_flag(tab1, LV_OBJ_FLAG_SCROLLABLE);
@@ -53,13 +53,13 @@ void page_news()
         lv_label_set_recolor(text7, true);
         lv_label_set_recolor(text8, true);
 
-        lv_label_set_text(text1, "现有确诊\n#FFA400 237111#");
-        lv_label_set_text(text2, "累积确诊\n#9B4400 389823#");
-        lv_label_set_text(text3, "无症状\n#A78E44 5076#");
-        lv_label_set_text(text4, "境外输入\n#44CEF6 16106#");
-        lv_label_set_text(text5, "累计治愈\n#40DE5A 143494#");
-        lv_label_set_text(text6, "累计死亡\n#758A99 9218#");
-        lv_label_set_text(text7, "#FF3300 更新时间:2022/3/12#");
+        lv_label_set_text_fmt(text1, "现有确诊\n#FFA400 %d#", retdata_curConfirm);
+        lv_label_set_text_fmt(text2, "累计确诊\n#9B4400 %d#", retdata_confirm);
+        lv_label_set_text_fmt(text3, "无症状\n#A78E44 %d#", retdata_asymptomatic);
+        lv_label_set_text_fmt(text4, "新增病例\n#44CEF6 %d#", retdata_nativeRelative);
+        lv_label_set_text_fmt(text5, "累计治愈\n#40DE5A %d#", retdata_heal);
+        lv_label_set_text_fmt(text6, "累计死亡\n#758A99 %d#", retdata_died);
+        lv_label_set_text_fmt(text7, "更新时间: #FF3300 %02d/%02d#", currentMonth, monthDay);
         lv_label_set_text(text8, "#F47983 疫情未结束,防疫别大意#\n#F47983 外出佩戴好口罩!#");
 
         lv_obj_set_pos(text1, 15, 0);

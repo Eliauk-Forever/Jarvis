@@ -1,7 +1,6 @@
 /**
  * @ Author: LAN
- * @ Modified time: 2022-03-29 23:52:08
- * @ Description: 增加了蜂鸣器播放音乐功能
+ * @ Modified time: 2022-03-31 22:49:52
  */
 
 #include "HAL/HAL.h"

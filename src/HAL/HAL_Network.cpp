@@ -97,7 +97,7 @@ void HAL::Wifi_Close()
 bool HAL::AutoConfig()
 {
   	WiFi.begin();
-  	for (int i = 0; i < 20; i++)
+  	for (int i = 0; i < 10; i++)
   	{
   	  	int wstatus = WiFi.status();
   	  	if (wstatus == WL_CONNECTED)

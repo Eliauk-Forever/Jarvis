@@ -3,33 +3,22 @@
 #include "page_weather.h"
 
 //天气代码图标
-LV_IMG_DECLARE(code0)
-LV_IMG_DECLARE(code1)
-LV_IMG_DECLARE(code4)
-LV_IMG_DECLARE(code5)
-LV_IMG_DECLARE(code6)
-LV_IMG_DECLARE(code7)
-LV_IMG_DECLARE(code8)
-LV_IMG_DECLARE(code9)
-LV_IMG_DECLARE(code10)
-LV_IMG_DECLARE(code11)
-LV_IMG_DECLARE(code13)
-LV_IMG_DECLARE(code14)
-LV_IMG_DECLARE(code15)
-LV_IMG_DECLARE(code16)
-LV_IMG_DECLARE(code17)
-LV_IMG_DECLARE(code18)
-LV_IMG_DECLARE(code30)
-LV_IMG_DECLARE(code31)
-LV_IMG_DECLARE(code32)
-LV_IMG_DECLARE(code33)
-LV_IMG_DECLARE(code37)
-LV_IMG_DECLARE(code38)
-LV_IMG_DECLARE(code99)
+LV_IMG_DECLARE(bing)
+LV_IMG_DECLARE(duoyun1)
+LV_IMG_DECLARE(duoyun2)
+LV_IMG_DECLARE(leitian)
+LV_IMG_DECLARE(qingtian1)
+LV_IMG_DECLARE(qingtian2)
+LV_IMG_DECLARE(sha)
+LV_IMG_DECLARE(wutian)
+LV_IMG_DECLARE(yintian)
+LV_IMG_DECLARE(yutian)
 LV_IMG_DECLARE(null)
 
 lv_obj_t* shijian;
 lv_timer_t* timer_update;
+
+String xue = "xue", qing = "qing", yun = "yun", yin = "yin", lei = "lei", shachen = "shachen", wu = "wu", bingbao = "bingbao", yu = "yu";
 
 static void back(lv_event_t* event)
 {
@@ -84,35 +73,57 @@ void page_weather()
         lv_obj_align(shijian, LV_ALIGN_TOP_LEFT, 15, 30);
         lv_obj_align_to(date, shijian, LV_ALIGN_BOTTOM_MID, 20, 30);
 
-        lv_obj_t* img_code = lv_img_create(scr_page);
-        lv_obj_add_style(img_code, &img_bg, 0);
-        lv_obj_align(img_code, LV_ALIGN_TOP_RIGHT, -25, 15);
+        lv_obj_t* img_wea = lv_img_create(scr_page);
+        lv_obj_add_style(img_wea, &img_bg, 0);
+        lv_obj_align(img_wea, LV_ALIGN_TOP_RIGHT, -25, 15);
 
-        switch(results_daima)       //根据天气代码选择对应的图标
+        if(results_img == qing)
         {
-            case 0: lv_img_set_src(img_code, &code0);break;
-            case 1: lv_img_set_src(img_code, &code1);break;
-            case 4: lv_img_set_src(img_code, &code4);break;
-            case 5: lv_img_set_src(img_code, &code5);break;
-            case 6: lv_img_set_src(img_code, &code6);break;
-            case 7: lv_img_set_src(img_code, &code5);break;
-            case 8: lv_img_set_src(img_code, &code6);break;
-            case 9: lv_img_set_src(img_code, &code9);break;
-            case 10: lv_img_set_src(img_code, &code10);break;
-            case 11: lv_img_set_src(img_code, &code11);break;
-            case 13: lv_img_set_src(img_code, &code15);break;
-            case 14: lv_img_set_src(img_code, &code15);break;
-            case 15: lv_img_set_src(img_code, &code15);break;
-            case 16: lv_img_set_src(img_code, &code17);break;
-            case 17: lv_img_set_src(img_code, &code17);break;
-            case 18: lv_img_set_src(img_code, &code17);break;
-            //case 30: lv_img_set_src(img_code, &code30);break;
-            //case 31: lv_img_set_src(img_code, &code31);break;
-            //case 32: lv_img_set_src(img_code, &code32);break;
-            //case 33: lv_img_set_src(img_code, &code33);break;
-            //case 37: lv_img_set_src(img_code, &code37);break;
-            case 38: lv_img_set_src(img_code, &code0);break;
-            default: lv_img_set_src(img_code, &code99);break;
+            if(currentHour < 18 && currentHour > 6)
+            {
+                lv_img_set_src(img_wea, &qingtian1);
+            }
+            else
+            {
+                lv_img_set_src(img_wea, &qingtian2);
+            }
+            
+        }
+        else if(results_img == yun)
+        {
+            if(currentHour < 18 && currentHour > 6)
+            {
+                lv_img_set_src(img_wea, &duoyun1);
+            }
+            else
+            {
+                lv_img_set_src(img_wea, &duoyun2);
+            }    
+        }
+        else if(results_img == yu)
+        {
+            lv_img_set_src(img_wea, &yutian);
+        }
+        
+        else if(results_img == yin)
+        {
+            lv_img_set_src(img_wea, &yintian);
+        }
+        else if(results_img == shachen)
+        {
+            lv_img_set_src(img_wea, &sha);
+        }
+        else if(results_img == lei)
+        {
+            lv_img_set_src(img_wea, &leitian);
+        }
+        else if(results_img == wu)
+        {
+            lv_img_set_src(img_wea, &wutian);
+        }
+        else
+        {
+            lv_img_set_src(img_wea, &bing);
         }
 
         //下半部分
@@ -122,8 +133,8 @@ void page_weather()
         lv_obj_set_style_text_font(city, &myfont, 0);
         lv_obj_set_style_text_font(tianqi, &myfont, 0);
         lv_label_set_recolor(city, true);
-        lv_label_set_text_fmt(city, "#CC0000 %s#", results_chengshi);
-        lv_label_set_text_fmt(tianqi, "%s", results_xianxiang);
+        lv_label_set_text_fmt(city, "#CC0000 %s区#", results_chengshi);
+        lv_label_set_text_fmt(tianqi, "%s", results_wea);
         lv_label_set_text_fmt(wendu, "%d°C", results_wendu);
         lv_obj_align(city, LV_ALIGN_LEFT_MID, 15, 45);
         lv_obj_align_to(tianqi, city, LV_ALIGN_CENTER, 0, 20);
@@ -142,19 +153,20 @@ void page_weather()
         
         lv_obj_t* text1 = lv_label_create(scr_page);
         lv_obj_t* text2 = lv_label_create(scr_page);
-        lv_obj_t* tigan = lv_label_create(scr_page);
+        lv_obj_t* air = lv_label_create(scr_page);
         lv_obj_t* shidu = lv_label_create(scr_page);
         lv_obj_set_style_text_font(text1, &myfont, 0);
         lv_obj_set_style_text_font(text2, &myfont, 0);
-        lv_label_set_recolor(tigan, true);
+        lv_obj_set_style_text_font(air, &myfont, 0);
+        lv_label_set_recolor(air, true);
         lv_label_set_recolor(shidu, true);
-        lv_label_set_text(text1, "体感温度");
+        lv_label_set_text(text1, "空气质量");
         lv_label_set_text(text2, "相对湿度");
-        lv_label_set_text_fmt(tigan, "#003371 %d°C#", results_tigan);
-        lv_label_set_text_fmt(shidu, "#003371 %d%#", results_shidu);
+        lv_label_set_text_fmt(air, "#003371 %s#", results_air);
+        lv_label_set_text_fmt(shidu, "#003371 %s%#", results_shidu);
         lv_obj_set_pos(text1, 120, 130);
         lv_obj_set_pos(text2, 220, 130);
-        lv_obj_align_to(tigan, text1, LV_ALIGN_BOTTOM_MID, 0, 25);
+        lv_obj_align_to(air, text1, LV_ALIGN_BOTTOM_MID, 0, 25);
         lv_obj_align_to(shidu, text2, LV_ALIGN_BOTTOM_MID, 0, 25);
 
         lv_obj_t* text3 = lv_label_create(scr_page);
@@ -167,8 +179,8 @@ void page_weather()
         lv_label_set_recolor(fengsu, true);
         lv_label_set_text(text3, "能见度");
         lv_label_set_text(text4, "风速");
-        lv_label_set_text_fmt(nengjiandu, "#003371 %dkm#", results_nengjiandu);
-        lv_label_set_text_fmt(fengsu, "#003371 %dkm/h#", results_fengsu);
+        lv_label_set_text_fmt(nengjiandu, "#003371 %s#", results_nengjiandu);
+        lv_label_set_text_fmt(fengsu, "#003371 %s#", results_fengsu);
         lv_obj_set_pos(text3, 130, 185);
         lv_obj_set_pos(text4, 240, 185);
         lv_obj_align_to(nengjiandu, text3, LV_ALIGN_BOTTOM_MID, 0, 25);

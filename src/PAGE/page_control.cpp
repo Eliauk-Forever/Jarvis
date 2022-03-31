@@ -17,18 +17,19 @@ LV_IMG_DECLARE(xinwen)
 LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
-// HTTP请求所需信息
-String reqUserKey = "SWm7P52lp4kw1UosX";   				     	 // 私钥
-String reqLocation = "shenzhen";            				     // 城市
+// 天气数据获取
+String reqLocation = "龙岗";
+String reqRes1 = "/api?unescape=1&version=v6&appid=79626654&appsecret=5fbAHaTN&city=" + reqLocation;
 
-String reqRes = "/v3/weather/now.json?key=" + reqUserKey + "&location=" + reqLocation
-                + "&language=zh-Hans&unit=c";
+//疫情数据获取
+String reqRes2 = "/api/94/221?format=json&appid=14749&city_name=深圳&sign=e295f2eedde010a71febf6cff27c24f9";
 String JsonAnswer;
 
 uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
 
-int results_daima, results_wendu, results_tigan, results_shidu, results_nengjiandu, results_fengsu;
-String results_chengshi = "", results_xianxiang = "";
+int results_wendu;
+int retdata_curConfirm, retdata_confirm, retdata_asymptomatic, retdata_nativeRelative, retdata_heal, retdata_died;
+String results_chengshi = "", results_wea = "", results_img = "", results_air = "", results_shidu = "", results_nengjiandu = "", results_fengsu = "", retdata_city = "";
 
 lv_obj_t* scr_setup, * scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
@@ -42,39 +43,69 @@ NTPClient timeClient(ntpUDP, "ntp.aliyun.com");  //NTP服务器地址
 
 void ParseInfo_xinzhi(String& json)
 {
-    StaticJsonDocument<768> doc;
+    StaticJsonDocument<1024> doc;
   	deserializeJson(doc, json);
-    JsonObject results_0 = doc["results"][0];
-    JsonObject results_0_location = results_0["location"];
-    JsonObject results_0_now = results_0["now"];
 
     // 通过串口监视器显示以上信息
-    results_chengshi = results_0_location["name"].as<String>();          //城市名称
-  	results_xianxiang = results_0_now["text"].as<String>();              //天气现象文字
-  	results_daima = results_0_now["code"].as<int>();                     //天气现象代码
-    results_wendu = results_0_now["temperature"].as<int>();              //温度
-    results_tigan = results_0_now["feels_like"].as<int>();               //体感温度
-    results_shidu = results_0_now["humidity"].as<int>();                 //相对湿度
-    results_nengjiandu = results_0_now["visibility"].as<int>();          //能见度
-    results_fengsu = results_0_now["wind_speed"].as<int>();              //风速
+    results_chengshi = doc["city"].as<String>();             //城市名称
+  	results_wea = doc["wea"].as<String>();                   //天气现象
+  	results_img = doc["wea_img"].as<String>();               //天气图片
+    results_wendu = doc["tem"].as<int>();                    //温度
+    results_air = doc["air_level"].as<String>();             //空气质量
+    results_shidu = doc["humidity"].as<String>();            //相对湿度
+    results_nengjiandu = doc["visibility"].as<String>();     //能见度
+    results_fengsu = doc["win_meter"].as<String>();          //风速
 
-    Serial.println("======Weahter Now=======");
+    Serial.println("======今日天气数据=======");
     Serial.print("城市: ");
   	Serial.println(results_chengshi);
   	Serial.print("天气现象: ");
-  	Serial.println(results_xianxiang);
-  	Serial.print("天气代码: ");
-  	Serial.println(results_daima);
+  	Serial.println(results_wea);
+  	Serial.print("天气图片: ");
+  	Serial.println(results_img);
     Serial.print("温度: ");
   	Serial.println(results_wendu);
-    Serial.print("体感温度: ");
-  	Serial.println(results_tigan);
+    Serial.print("空气质量: ");
+  	Serial.println(results_air);
     Serial.print("相对湿度: ");
   	Serial.println(results_shidu);
     Serial.print("能见度: ");
   	Serial.println(results_nengjiandu);
     Serial.print("风速: ");
   	Serial.println(results_fengsu);
+  	Serial.println("========================"); 
+}
+
+void ParseInfo_news(String& json)
+{
+    StaticJsonDocument<512> doc;
+  	deserializeJson(doc, json);
+    JsonObject retdata = doc["retdata"];
+
+    // 通过串口监视器显示以上信息
+    retdata_city = retdata["city"].as<String>();            //城市名称
+    retdata_curConfirm = retdata["curConfirm"];             //现有确诊
+    retdata_confirm = retdata["confirm"];                   //累计确诊
+    retdata_asymptomatic = retdata["asymptomatic"];         //无症状
+    retdata_nativeRelative = retdata["nativeRelative"];     //新增病例
+    retdata_heal = retdata["heal"];                         //累计治愈
+    retdata_died = retdata["died"];                         //累计死亡
+    
+  	Serial.println("======本地疫情数据=======");
+    Serial.print("城市: ");
+  	Serial.println(retdata_city);
+  	Serial.print("现有确诊: ");
+  	Serial.println(retdata_curConfirm);
+  	Serial.print("累计确诊: ");
+  	Serial.println(retdata_confirm);
+    Serial.print("无症状: ");
+  	Serial.println(retdata_asymptomatic);
+    Serial.print("新增病例: ");
+  	Serial.println(retdata_nativeRelative);
+    Serial.print("累计治愈: ");
+  	Serial.println(retdata_heal);
+    Serial.print("累计死亡: ");
+  	Serial.println(retdata_died);
   	Serial.println("========================"); 
 }
 
@@ -112,8 +143,8 @@ void HttpRequest(String reqRes, const char* host)
   		  	}
   		}
   		JsonAnswer = Answer.substring(JsonIndex);
-      	//Serial.println("JsonAnswer: ");
-      	//Serial.println(JsonAnswer);
+      	Serial.println("JsonAnswer: ");
+      	Serial.println(JsonAnswer);
   	} 
 	else 
 	{
@@ -205,9 +236,13 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
 
         //获取天气信息
-        HttpRequest(reqRes, "api.seniverse.com");
+        HttpRequest(reqRes1, "yiketianqi.com");
 		ParseInfo_xinzhi(JsonAnswer);      // 利用ArduinoJson库解析响应信息
 
+        //获取本地疫情数据
+        HttpRequest(reqRes2, "yupn.api.storeapi.net");
+        ParseInfo_news(JsonAnswer);
+        
         lv_timer_resume(timer2);
         lv_timer_ready(timer3);
         lv_timer_pause(timer1);
@@ -255,7 +290,7 @@ void page_home()
     scr_home = lv_obj_create(NULL);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 2100, true);
 
-	HAL::Audio_PlayMusic("Startup");
+	//HAL::Audio_PlayMusic("Startup");
     
     //设置桌面壁纸
     lv_obj_t* bg_desktop = lv_img_create(scr_home);

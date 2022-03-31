@@ -43,7 +43,7 @@ static void wifi_event_handler(lv_event_t* b)
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
 		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
             }
-			HAL::Audio_PlayMusic("Connect");
+			//HAL::Audio_PlayMusic("Connect");
 		}
 		else
 		{
