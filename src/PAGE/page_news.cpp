@@ -13,7 +13,7 @@ void page_news()
 {
     lv_obj_add_event_cb(scr_page, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);
 
-    if(Wifi_status == 2)
+    if(Wifi_status == 2 || Wifi_status == 3)
     {
         lv_obj_t* news_tab = lv_tabview_create(scr_page, LV_DIR_LEFT, 50);
         lv_obj_add_event_cb(news_tab, back_delete_cb, LV_EVENT_LONG_PRESSED, NULL);

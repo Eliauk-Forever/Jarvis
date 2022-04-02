@@ -1,6 +1,6 @@
 #include "HAL.h"
 
-uint8_t Wifi_status = 0;	//0 -> 未连接, 1 -> AP模式, 2 -> STA模式, 3->连接中
+uint8_t Wifi_status = 0;	//0 -> 未连接, 1 -> AP模式, 2 -> 已连接， 3 -> 连接后断开
 
 const char* AP_SSID  = "ESP32_Config"; //热点名称
 String wifi_ssid = "";

@@ -2,7 +2,7 @@
 #include "page_control.h"
 #include "page_setting.h"
 
-lv_obj_t* status, * label_SSID, * label_IP, * SSID, * IP, * label_MAC, * MAC, * sw_backlight, * sw_ble;
+lv_obj_t* status, * label_SSID, * label_IP, * SSID, * IP, * label_MAC, * MAC, * sw_backlight;
 int newBacklight;
 
 String ip2Str(IPAddress ip)		//IP地址转字符串
@@ -21,7 +21,7 @@ static void back_delete_cb(lv_event_t* event)
     {
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WIFI);
     }
-    if(Wifi_status == 0 || Wifi_status == 1)
+    else
     {
         lv_label_set_text(symbol_wifi, LV_SYMBOL_WARNING);
     }
@@ -48,7 +48,7 @@ static void wifi_event_handler(lv_event_t* b)
 		else
 		{
 			HAL::Wifi_Close();
-            Wifi_status = 0;
+            Wifi_status = 3;
 		    lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		    lv_label_set_text(SSID, "");
 		    lv_label_set_text(IP, "");
@@ -85,6 +85,23 @@ static void set_backlight(lv_event_t* d)
 	currentBacklight = (int)lv_slider_get_value(sw_backlight);
 	newBacklight = map(currentBacklight, 5, 100, 50, 1024);
 	HAL::Backlight_SetValue(newBacklight);
+}
+
+static void btn_event_handler(lv_event_t* e)
+{
+	lv_obj_t* mbox;
+	if(Data_Update())
+	{
+		HAL::Audio_PlayMusic("Startup");
+		mbox = lv_msgbox_create(NULL, LV_SYMBOL_BELL "News", "Data updated successfully!", NULL, true);
+		lv_obj_center(mbox);
+	}
+	else
+	{
+		HAL::Audio_PlayMusic("Error");
+		mbox = lv_msgbox_create(NULL, LV_SYMBOL_WARNING "Warning", "No network!", NULL, true);
+		lv_obj_center(mbox);
+	}
 }
 
 void page_setting()
@@ -131,7 +148,7 @@ void page_setting()
     lv_obj_add_style(IP, &text_style, 0);
     lv_obj_add_style(MAC, &text_style, 0);
 
-    if(Wifi_status == 0)
+    if(Wifi_status == 0 || Wifi_status == 3)
     {
 		lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		lv_label_set_text(SSID, "");
@@ -217,9 +234,13 @@ void page_setting()
 
     lv_obj_t* text6 = lv_label_create(tab3);
 	Text_Format(text6, 0, 135, true, false);
-    lv_label_set_text(text6, "蓝牙开关");
+    lv_label_set_text(text6, "数据更新");
 
-	lv_obj_t* sw_ble = lv_switch_create(tab3);
-    lv_obj_set_size(sw_ble, 50, 25);
-    lv_obj_set_pos(sw_ble, 120, 135);
+	lv_obj_t* btn_update = lv_btn_create(tab3);
+	lv_obj_t* label_update = lv_label_create(btn_update);
+	lv_obj_center(label_update);
+	lv_label_set_text(label_update, LV_SYMBOL_REFRESH);
+    lv_obj_set_size(btn_update, 50, 25);
+    lv_obj_set_pos(btn_update, 120, 135);
+	lv_obj_add_event_cb(btn_update, btn_event_handler, LV_EVENT_CLICKED, NULL);
 }
