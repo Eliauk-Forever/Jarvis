@@ -16,11 +16,13 @@ extern lv_style_t img_bg;
 extern uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
 
 //存放服务器的返回信息
-extern int results_wendu;
-extern int retdata_curConfirm, retdata_confirm, retdata_asymptomatic, retdata_nativeRelative, retdata_heal, retdata_died;
-extern String results_chengshi, results_wea, results_img, results_air, results_shidu, results_nengjiandu, results_fengsu, retdata_city;
+extern int results_wendu, img_code;
+extern String results_chengshi, results_wea, results_air, results_shidu, results_nengjiandu, results_fengsu, retdata_city;         //天气数据变量
+extern int Local_curConfirm, Local_confirm, Local_asymptomatic, Local_nativeRelative, Local_heal, Local_died;                      //地区疫情变量
+extern int National_curConfirm, National_confirm, National_asymptomatic, National_nativeRelative, National_heal, National_died;    //全国疫情变量
 
 void Gui_Init(void);
+void Text_Format(lv_obj_t* obj, int pos_x, int pos_y, bool hans, bool recolor);
 
 #ifdef __cplusplus
 } /* extern "C" */

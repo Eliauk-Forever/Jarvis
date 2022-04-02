@@ -17,19 +17,27 @@ LV_IMG_DECLARE(xinwen)
 LV_IMG_DECLARE(ganzhi)
 LV_IMG_DECLARE(shezhi)
 
+uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
+
+int results_wendu, img_code;
+int Local_curConfirm, Local_confirm, Local_asymptomatic, Local_nativeRelative, Local_heal, Local_died;  //地区疫情变量
+int National_curConfirm, National_confirm, National_asymptomatic, National_nativeRelative, National_heal, National_died;    //全国疫情变量
+String results_chengshi = "", results_wea = "", results_air = "", results_shidu = "", results_nengjiandu = "", results_fengsu = "", retdata_city = "";
+
 // 天气数据获取
 String reqLocation = "龙岗";
 String reqRes1 = "/api?unescape=1&version=v6&appid=79626654&appsecret=5fbAHaTN&city=" + reqLocation;
+String reqRes2 = "/v3/weather/now.json?key=SWm7P52lp4kw1UosX&location=shenzhen&language=zh-Hans&unit=c";
 
 //疫情数据获取
-String reqRes2 = "/api/94/221?format=json&appid=14749&city_name=深圳&sign=e295f2eedde010a71febf6cff27c24f9";
+String reqRes3 = "/api/94/221?format=json&appid=14749&city_name=深圳&sign=e295f2eedde010a71febf6cff27c24f9";
+String reqRes4 = "/api/94/221?format=json&city_name=东莞&appid=14749&sign=d41a8310e3518c30683a561b26c414ba";
+// String reqRes3 = "/nCoV/api/area?latest=1&province=中国";
+
+//黄历数据获取
+String reqRes5 = "/lunar/index?key=a4404ceba09e9051464aff239bf507de&date=";
+
 String JsonAnswer;
-
-uint16_t currentHour, currentMinute, currentSecond, weekDay, monthDay, currentMonth, currentYear;
-
-int results_wendu;
-int retdata_curConfirm, retdata_confirm, retdata_asymptomatic, retdata_nativeRelative, retdata_heal, retdata_died;
-String results_chengshi = "", results_wea = "", results_img = "", results_air = "", results_shidu = "", results_nengjiandu = "", results_fengsu = "", retdata_city = "";
 
 lv_obj_t* scr_setup, * scr_home, * scr_page;
 lv_obj_t* symbol_wifi, * symbol_sd, * home_time, * btn_back;
@@ -41,15 +49,30 @@ WiFiUDP ntpUDP;
 WiFiClient client;
 NTPClient timeClient(ntpUDP, "ntp.aliyun.com");  //NTP服务器地址
 
-void ParseInfo_xinzhi(String& json)
+//设置文字格式,参数分别为部件,x轴位置,y轴位置,中文使能,重上色使能,文本内容
+void Text_Format(lv_obj_t* obj, int pos_x, int pos_y, bool hans, bool recolor)
+{
+	if(pos_x != NULL || pos_y != NULL )
+	{
+		lv_obj_set_pos(obj, pos_x, pos_y);
+	}
+    if (hans)
+    {
+        lv_obj_set_style_text_font(obj, &myfont, 0);
+    }
+    if (recolor)
+    {
+        lv_label_set_recolor(obj, recolor);
+    }
+}
+
+void ParseInfo_Weather(String& json)
 {
     StaticJsonDocument<1024> doc;
   	deserializeJson(doc, json);
 
     // 通过串口监视器显示以上信息
     results_chengshi = doc["city"].as<String>();             //城市名称
-  	results_wea = doc["wea"].as<String>();                   //天气现象
-  	results_img = doc["wea_img"].as<String>();               //天气图片
     results_wendu = doc["tem"].as<int>();                    //温度
     results_air = doc["air_level"].as<String>();             //空气质量
     results_shidu = doc["humidity"].as<String>();            //相对湿度
@@ -58,11 +81,7 @@ void ParseInfo_xinzhi(String& json)
 
     Serial.println("======今日天气数据=======");
     Serial.print("城市: ");
-  	Serial.println(results_chengshi);
-  	Serial.print("天气现象: ");
-  	Serial.println(results_wea);
-  	Serial.print("天气图片: ");
-  	Serial.println(results_img);
+  	Serial.println(results_chengshi);	
     Serial.print("温度: ");
   	Serial.println(results_wendu);
     Serial.print("空气质量: ");
@@ -73,10 +92,26 @@ void ParseInfo_xinzhi(String& json)
   	Serial.println(results_nengjiandu);
     Serial.print("风速: ");
   	Serial.println(results_fengsu);
-  	Serial.println("========================"); 
 }
 
-void ParseInfo_news(String& json)
+void ParseInfo_Xinzhi(String& json)
+{
+	StaticJsonDocument<1024> doc;
+  	deserializeJson(doc, json);
+
+	JsonObject results_0 = doc["results"][0];
+	JsonObject results_0_now = results_0["now"];
+	results_wea = results_0_now["text"].as<String>();           //天气现象
+	img_code = results_0_now["code"].as<int>();					//天气代码
+
+	Serial.print("天气现象: ");
+  	Serial.println(results_wea);
+	Serial.print("天气代码: ");
+  	Serial.println(img_code);
+	Serial.println("========================"); 
+}
+
+void ParseInfo_Local_News(String& json)
 {
     StaticJsonDocument<512> doc;
   	deserializeJson(doc, json);
@@ -84,30 +119,90 @@ void ParseInfo_news(String& json)
 
     // 通过串口监视器显示以上信息
     retdata_city = retdata["city"].as<String>();            //城市名称
-    retdata_curConfirm = retdata["curConfirm"];             //现有确诊
-    retdata_confirm = retdata["confirm"];                   //累计确诊
-    retdata_asymptomatic = retdata["asymptomatic"];         //无症状
-    retdata_nativeRelative = retdata["nativeRelative"];     //新增病例
-    retdata_heal = retdata["heal"];                         //累计治愈
-    retdata_died = retdata["died"];                         //累计死亡
+    Local_curConfirm = retdata["curConfirm"];             //现有确诊
+    Local_confirm = retdata["confirm"];                   //累计确诊
+    Local_asymptomatic = retdata["asymptomatic"];         //无症状
+    Local_nativeRelative = retdata["nativeRelative"];     //新增病例
+    Local_heal = retdata["heal"];                         //累计治愈
+    Local_died = retdata["died"];                         //累计死亡
     
-  	Serial.println("======本地疫情数据=======");
+  	Serial.println("======深圳疫情数据=======");
     Serial.print("城市: ");
   	Serial.println(retdata_city);
   	Serial.print("现有确诊: ");
-  	Serial.println(retdata_curConfirm);
+  	Serial.println(Local_curConfirm);
   	Serial.print("累计确诊: ");
-  	Serial.println(retdata_confirm);
+  	Serial.println(Local_confirm);
     Serial.print("无症状: ");
-  	Serial.println(retdata_asymptomatic);
+  	Serial.println(Local_asymptomatic);
     Serial.print("新增病例: ");
-  	Serial.println(retdata_nativeRelative);
+  	Serial.println(Local_nativeRelative);
     Serial.print("累计治愈: ");
-  	Serial.println(retdata_heal);
+  	Serial.println(Local_heal);
     Serial.print("累计死亡: ");
-  	Serial.println(retdata_died);
+  	Serial.println(Local_died);
   	Serial.println("========================"); 
 }
+
+void ParseInfo_National_News(String& json)
+{
+    StaticJsonDocument<512> doc;
+  	deserializeJson(doc, json);
+	JsonObject retdata = doc["retdata"];
+
+    // 通过串口监视器显示以上信息
+    National_curConfirm = retdata["curConfirm"];        		//现有确诊
+    National_confirm = retdata["confirm"];                 	 	//累计确诊
+    National_asymptomatic = retdata["asymptomatic"];         	//无症状
+    National_nativeRelative = retdata["nativeRelative"];        //新增病例
+    National_heal = retdata["heal"];                         	//累计治愈
+    National_died = retdata["died"];                            //累计死亡
+    
+  	Serial.println("======东莞疫情数据=======");
+  	Serial.print("现有确诊: ");
+  	Serial.println(National_curConfirm);
+  	Serial.print("累计确诊: ");
+  	Serial.println(National_confirm);
+    Serial.print("无症状: ");
+  	Serial.println(National_asymptomatic);
+    Serial.print("新增病例: ");
+  	Serial.println(National_nativeRelative);
+    Serial.print("累计治愈: ");
+  	Serial.println(National_heal);
+    Serial.print("累计死亡: ");
+  	Serial.println(National_died);
+  	Serial.println("========================"); 
+}
+
+// void ParseInfo_National_News(String& json)
+// {
+//     StaticJsonDocument<768> doc;
+//   	deserializeJson(doc, json);
+// 	JsonObject results_0 = doc["results"][0];
+
+//     // 通过串口监视器显示以上信息
+//     National_curConfirm = results_0["currentConfirmedCount"];        //现有确诊
+//     National_confirm = results_0["confirmedCount"];                  //累计确诊
+//     National_asymptomatic = results_0["seriousCount"];         		 //无症状
+//     National_nativeRelative = results_0["confirmedIncr"];            //新增病例
+//     National_heal = results_0["curedCount"];                         //累计治愈
+//     National_died = results_0["deadCount"];                          //累计死亡
+    
+//   	Serial.println("======全国疫情数据=======");
+//   	Serial.print("现有确诊: ");
+//   	Serial.println(National_curConfirm);
+//   	Serial.print("累计确诊: ");
+//   	Serial.println(National_confirm);
+//     Serial.print("无症状: ");
+//   	Serial.println(National_asymptomatic);
+//     Serial.print("新增病例: ");
+//   	Serial.println(National_nativeRelative);
+//     Serial.print("累计治愈: ");
+//   	Serial.println(National_heal);
+//     Serial.print("累计死亡: ");
+//   	Serial.println(National_died);
+//   	Serial.println("========================"); 
+// }
 
 void HttpRequest(String reqRes, const char* host)
 {	
@@ -122,11 +217,14 @@ void HttpRequest(String reqRes, const char* host)
     	// 获取并显示服务器响应状态行 
     	String status_response = client.readStringUntil('\n');
 		String Answer;
-		while(client.available())
-    	{
-      		String line = client.readStringUntil('\r');
-      		Answer += line;
-    	}
+		while (client.connected() || client.available()) //如果已连接或有收到的未读取的数据
+        {
+			if(client.available())
+    		{
+      			String line = client.readStringUntil('\r');
+      			Answer += line;
+    		}
+		}
     	// 使用find跳过HTTP响应头
     	if (client.find("\r\n\r\n")) 
 		{
@@ -143,8 +241,8 @@ void HttpRequest(String reqRes, const char* host)
   		  	}
   		}
   		JsonAnswer = Answer.substring(JsonIndex);
-      	Serial.println("JsonAnswer: ");
-      	Serial.println(JsonAnswer);
+      	//Serial.println("JsonAnswer: ");
+      	//Serial.println(JsonAnswer);
   	} 
 	else 
 	{
@@ -237,12 +335,22 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
 
         //获取天气信息
         HttpRequest(reqRes1, "yiketianqi.com");
-		ParseInfo_xinzhi(JsonAnswer);      // 利用ArduinoJson库解析响应信息
+		ParseInfo_Weather(JsonAnswer);// 利用ArduinoJson库解析响应信息
+
+		HttpRequest(reqRes2, "api.seniverse.com");
+		ParseInfo_Xinzhi(JsonAnswer);
 
         //获取本地疫情数据
-        HttpRequest(reqRes2, "yupn.api.storeapi.net");
-        ParseInfo_news(JsonAnswer);
+        HttpRequest(reqRes3, "yupn.api.storeapi.net");
+        ParseInfo_Local_News(JsonAnswer);
+
+		HttpRequest(reqRes4, "yupn.api.storeapi.net");
+        ParseInfo_National_News(JsonAnswer);
         
+		//获取全国疫情数据
+		// HttpRequest(reqRes3, "lab.isaaclin.cn");
+		// ParseInfo_National_News(JsonAnswer);
+
         lv_timer_resume(timer2);
         lv_timer_ready(timer3);
         lv_timer_pause(timer1);

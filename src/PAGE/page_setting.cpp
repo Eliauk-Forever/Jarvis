@@ -177,9 +177,10 @@ void page_setting()
 
 	//tab3显示的内容（设置界面）
     lv_obj_t* text3 = lv_label_create(tab3);
-	lv_obj_set_style_text_font(text3, &myfont, 0);
+	//设置文本格式
+    Text_Format(text3, 0, 10, true, false);
 	lv_label_set_text(text3, "WIFI开关");    
-	lv_obj_set_pos(text3, 0, 10);
+
     lv_obj_t* sw_wifi = lv_switch_create(tab3);
 	lv_obj_set_size(sw_wifi, 50, 25);
 	lv_obj_set_pos(sw_wifi, 120, 10);
@@ -191,9 +192,9 @@ void page_setting()
 
 	//屏幕背光亮度控制
 	lv_obj_t* text4 = lv_label_create(tab3);
-    lv_obj_set_style_text_font(text4, &myfont, 0);
+	Text_Format(text4, 0, 50, true, false);
     lv_label_set_text(text4, "屏幕亮度");
-    lv_obj_set_pos(text4, 0, 50);
+
 	sw_backlight = lv_slider_create(tab3);
     lv_obj_set_pos(sw_backlight, 120, 50);
     lv_obj_set_size(sw_backlight, 140, 20);
@@ -202,9 +203,9 @@ void page_setting()
     lv_obj_add_event_cb(sw_backlight, set_backlight, LV_EVENT_VALUE_CHANGED, NULL);
 
 	lv_obj_t* text5 = lv_label_create(tab3);
-    lv_obj_set_style_text_font(text5, &myfont, 0);
+	Text_Format(text5, 0, 95, true, false);
     lv_label_set_text(text5, "蜂鸣器开关");
-    lv_obj_set_pos(text5, 0, 95);
+
     lv_obj_t* sw_buzzer = lv_switch_create(tab3);
     lv_obj_set_size(sw_buzzer, 50, 25);
     lv_obj_set_pos(sw_buzzer, 120, 95);
@@ -215,9 +216,9 @@ void page_setting()
 	lv_obj_add_event_cb(sw_buzzer, buzz_event_handler, LV_EVENT_ALL, NULL);
 
     lv_obj_t* text6 = lv_label_create(tab3);
-    lv_obj_set_style_text_font(text6, &myfont, 0);
+	Text_Format(text6, 0, 135, true, false);
     lv_label_set_text(text6, "蓝牙开关");
-    lv_obj_set_pos(text6, 0, 135);
+
 	lv_obj_t* sw_ble = lv_switch_create(tab3);
     lv_obj_set_size(sw_ble, 50, 25);
     lv_obj_set_pos(sw_ble, 120, 135);
