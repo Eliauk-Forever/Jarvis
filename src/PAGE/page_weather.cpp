@@ -19,27 +19,27 @@ LV_IMG_DECLARE(null)
 LV_IMG_DECLARE(feng)
 
 lv_obj_t* shijian;
-lv_timer_t* timer_update;
+lv_timer_t* timer5;
 
-static void back(lv_event_t* event)
+static void back_desktop(lv_event_t* event)
 {
-    lv_timer_del(timer_update);
+    lv_timer_del(timer5);
     lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);   //退出后删除页面
 }
 
-void update(lv_timer_t * timer_update)
+void update(lv_timer_t * timer5)
 {
     lv_label_set_text_fmt(shijian, "%02d:%02d:%02d", currentHour, currentMinute, currentSecond);
 }
 
 void page_weather()
 {
-    timer_update = lv_timer_create(update, 1000, NULL);		//创建一个定时器更新时间
-    lv_obj_add_event_cb(scr_page, back, LV_EVENT_LONG_PRESSED, NULL);
+    timer5 = lv_timer_create(update, 1000, NULL);		//创建一个定时器更新时间
+    lv_obj_add_event_cb(scr_page, back_desktop, LV_EVENT_LONG_PRESSED, NULL);
 
     if(Wifi_status == 2 || Wifi_status == 3)
     {
-		lv_timer_ready(timer_update);
+		lv_timer_ready(timer5);
 
         lv_obj_set_scrollbar_mode(scr_page, LV_SCROLLBAR_MODE_ACTIVE);
         static lv_style_t bg_style;     //背景蓝白渐变
@@ -237,7 +237,7 @@ void page_weather()
     else
     {
         lv_obj_t* bg_null = lv_img_create(scr_page);
-        lv_timer_pause(timer_update);
+        lv_timer_pause(timer5);
         lv_img_set_src(bg_null, &null);
     }
 }

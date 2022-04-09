@@ -35,7 +35,7 @@ String reqRes3 = "/api/94/221?format=json&city_name=东莞&appid=14749&sign=d41a
 // String reqRes3 = "/nCoV/api/area?latest=1&province=中国";
 
 //黄历数据获取
-//String reqRes5 = "/lunar/index?key=a4404ceba09e9051464aff239bf507de&date=";
+//String reqRes4 = "/lunar/index?key=a4404ceba09e9051464aff239bf507de&date=";
 
 String JsonAnswer;
 
@@ -315,26 +315,17 @@ void wifi_detect(lv_timer_t * timer1)		    //检测当前WIFI状态，连接成�
 	}
 }
 
-bool Data_Update()		//重新获取数据
+void Data_Update()		//重新获取数据
 {
-	if(Wifi_status == 2)
-	{	
-		//获取天气信息
-    	HttpRequest(reqRes1, "apis.juhe.cn");
-		ParseInfo_Weather(JsonAnswer);// 利用ArduinoJson库解析响应信息
 
-    	//获取地区疫情数据
-    	HttpRequest(reqRes2, "yupn.api.storeapi.net");
-    	ParseInfo_Local_News(JsonAnswer);
-		HttpRequest(reqRes3, "yupn.api.storeapi.net");
-    	ParseInfo_National_News(JsonAnswer);
-
-		return true;
-	}
-	else 
-	{
-		return false;
-	}
+	//获取天气信息
+    HttpRequest(reqRes1, "apis.juhe.cn");
+	ParseInfo_Weather(JsonAnswer);// 利用ArduinoJson库解析响应信息
+    //获取地区疫情数据
+    HttpRequest(reqRes2, "yupn.api.storeapi.net");
+    ParseInfo_Local_News(JsonAnswer);
+	HttpRequest(reqRes3, "yupn.api.storeapi.net");
+    ParseInfo_National_News(JsonAnswer);
 }
 
 void time_update(lv_timer_t * timer2)       //通过RTC获取时间,每1s执行一次

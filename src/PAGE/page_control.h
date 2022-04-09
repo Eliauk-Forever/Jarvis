@@ -23,7 +23,7 @@ extern int National_curConfirm, National_confirm, National_asymptomatic, Nationa
 
 void Gui_Init(void);
 void Text_Format(lv_obj_t* obj, int pos_x, int pos_y, bool hans, bool recolor);
-bool Data_Update();
+void Data_Update();
 
 #ifdef __cplusplus
 } /* extern "C" */

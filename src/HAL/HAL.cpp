@@ -23,10 +23,10 @@ void HAL::Init()
     Serial.print("Author: " VERSION_AUTHOR_NAME);
 	Serial.println("\n");
 
+	setCpuFrequencyMhz(160);	//设置MCU主频
 	//HAL::SD_Init();
 	HAL::Buzz_init();
     HAL::Audio_Init();
-
 }
 
 void HAL::Wifi_Connect()

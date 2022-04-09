@@ -2,18 +2,7 @@
 #include "page_control.h"
 #include "page_calendar.h"
 
-lv_obj_t* calendar, * scr_lunar;
-
-static void back_desktop(lv_event_t* a)
-{
-    lv_scr_load_anim(scr_home, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
-}
-
-static void page_lunar(lv_event_t* b)
-{  
-    lv_scr_load_anim(scr_lunar, LV_SCR_LOAD_ANIM_NONE, 50, 0, true);
-    lv_obj_add_event_cb(scr_lunar, back_desktop, LV_EVENT_LONG_PRESSED, NULL);
-}
+lv_obj_t* calendar;
 
 void page_calendar()
 {
@@ -36,8 +25,8 @@ void page_calendar()
 
     Text_Format(text1, NULL, NULL, true, true);
     Text_Format(year, 240, 55, true, false);
-    Text_Format(month, 240, 85, true, false);
-    Text_Format(day, 240, 115, true, false);
+    Text_Format(month, 240, 95, true, false);
+    Text_Format(day, 240, 135, true, false);
     lv_obj_align_to(text1, year, LV_ALIGN_CENTER, 10, -25);
 
     lv_label_set_text(text1, "#FF3300 新历");
@@ -57,22 +46,6 @@ void page_calendar()
         lv_calendar_set_today_date(calendar, currentYear, currentMonth, monthDay);
         lv_calendar_set_showed_date(calendar, currentYear, currentMonth);
     }
-
-    static lv_style_t btn_style;
-    lv_style_init(&btn_style);
-    lv_style_set_bg_color(&btn_style, lv_color_make(0x06, 0x52, 0x79));
-    
-    lv_obj_t* btn = lv_btn_create(scr_page);
-    lv_obj_add_style(btn, &btn_style, 0);
-    lv_obj_set_size(btn, 70, 50);
-    lv_obj_set_pos(btn, 240, 170);
-    text2 = lv_label_create(btn);
-    Text_Format(text2, NULL, NULL, true, false);
-    lv_obj_center(text2);
-    lv_label_set_text(text2, "农历");
-
-    scr_lunar = lv_obj_create(NULL);
-    //lv_obj_add_event_cb(btn, page_lunar, LV_EVENT_SHORT_CLICKED, NULL);
 
     lv_calendar_header_dropdown_create(calendar);
 }

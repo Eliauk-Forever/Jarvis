@@ -36,12 +36,14 @@ static void wifi_event_handler(lv_event_t* b)
 	{
 		if (lv_obj_has_state(obj, LV_STATE_CHECKED))
 		{
+			HAL::Buzz_Tone(300, 5);
             if(HAL::AutoConfig())
             {	
                 Wifi_status = 2;
                 lv_label_set_text(status, "#FF6EC7 已连接WIFI#");
 		        lv_label_set_text(SSID, WiFi.SSID().c_str());
 		        lv_label_set_text(IP, ip2Str(WiFi.localIP()).c_str());
+				lv_label_set_text(MAC, WiFi.macAddress().c_str());
             }
 			//HAL::Audio_PlayMusic("Connect");
 		}
@@ -52,6 +54,7 @@ static void wifi_event_handler(lv_event_t* b)
 		    lv_label_set_text(status, "#3299CC WIFI已关闭#");
 		    lv_label_set_text(SSID, "");
 		    lv_label_set_text(IP, "");
+			lv_label_set_text(MAC, "");
 
 			HAL::Audio_PlayMusic("Disconnect");
 		}
@@ -71,6 +74,7 @@ static void buzz_event_handler(lv_event_t* c)
 		}
 		else
 		{
+			HAL::Buzz_Tone(300, 5);
 			HAL::Buzz_SetEnable(false);	
 		}
 	}
@@ -87,20 +91,22 @@ static void set_backlight(lv_event_t* d)
 	HAL::Backlight_SetValue(newBacklight);
 }
 
-static void btn_event_handler(lv_event_t* e)
+void btn_event_handler(lv_event_t* e)
 {
-	lv_obj_t* mbox;
-	if(Data_Update())
+	// lv_obj_t* mbox;
+	if(Wifi_status != 2)
 	{
-		HAL::Audio_PlayMusic("Startup");
-		mbox = lv_msgbox_create(NULL, LV_SYMBOL_BELL "News", "Data updated successfully!", NULL, true);
-		lv_obj_center(mbox);
+		HAL::Audio_PlayMusic("Error");
+		// mbox = lv_msgbox_create(NULL, LV_SYMBOL_WARNING "Warning", "No network!", NULL, true);
+		// lv_obj_center(mbox);
 	}
 	else
 	{
-		HAL::Audio_PlayMusic("Error");
-		mbox = lv_msgbox_create(NULL, LV_SYMBOL_WARNING "Warning", "No network!", NULL, true);
-		lv_obj_center(mbox);
+		HAL::Buzz_Tone(300, 5);
+		Data_Update();
+		HAL::Audio_PlayMusic("Startup");
+		// mbox = lv_msgbox_create(NULL, LV_SYMBOL_BELL "News", "Data updated successfully!", NULL, true);
+		// lv_obj_center(mbox);	
 	}
 }
 
